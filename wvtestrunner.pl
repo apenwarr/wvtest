@@ -32,7 +32,7 @@ sub bigkill($)
 	print "\n" . join("\n", @log) . "\n";
     }
     
-    print STDERR "Killed by signal.\n";
+    print STDERR "\n! Killed by signal    FAILED\n";
 
     ($pid > 0) || die("pid is '$pid'?!\n");
 
@@ -50,7 +50,11 @@ sub bigkill($)
 
 # parent
 local $SIG{INT} = sub { bigkill($pid); };
-local $SIG{TERM} = sub { bikill($pid); };
+local $SIG{TERM} = sub { bigkill($pid); };
+local $SIG{ALRM} = sub { 
+    print STDERR "Alarm timed out!  No test results for too long.\n";
+    bigkill($pid);
+};
 
 sub colourize($)
 {
@@ -76,9 +80,12 @@ my $insection = 0;
 while (<$fh>)
 {
     chomp;
+    s/\r//g;
     
     if (/^\s*Testing "(.*)" in (.*):\s*$/)
     {
+        alarm(120);
+    
 	my ($sect, $file) = ($1, $2);
 	
 	if ($insection) {
@@ -91,6 +98,8 @@ while (<$fh>)
     }
     elsif (/^!\s*(.*?)\s+(\S+)\s*$/)
     {
+        alarm(120);
+    
 	my ($name, $result) = ($1, $2);
 	my $pass = ($result eq "ok");
 	
