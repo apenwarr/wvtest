@@ -139,10 +139,17 @@ if ($newpid != $pid) {
 my $code = $?;
 my $ret = ($code >> 8);
 
+# return death-from-signal exits as >128.  This is what bash does if you ran
+# the program directly.
+if ($code && !$ret) { $ret = $code | 128; }
+
 if ($ret && @log) {
     print "\n" . join("\n", @log) . "\n";
 }
 
+if ($code != 0) {
+    print resultline("Program returned non-zero exit code ($ret)", "FAILED");
+}
 
 my $gtotal = $gpasses+$gfails;
 printf("\nWvTest: %d test%s, %d failure%s.\n",
