@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 use strict;
+use Time::HiRes qw(time);
 
 # always flush
 $| = 1;
@@ -69,13 +70,37 @@ sub colourize($)
     }
 }
 
+sub mstime($$$)
+{
+    my ($floatsec, $warntime, $badtime) = @_;
+    my $ms = int($floatsec * 1000);
+    my $str = sprintf("%d.%03ds", $ms/1000, $ms % 1000);
+    
+    if ($istty && $ms > $badtime) {
+        return "\e[31;1m$str\e[0m";
+    } elsif ($istty && $ms > $warntime) {
+        return "\e[33;1m$str\e[0m";
+    } else {
+        return "$str";
+    }
+}
+
 sub resultline($$)
 {
     my ($name, $result) = @_;
     return sprintf("! %-65s %s", $name, colourize($result));
 }
 
-my $insection = 0;
+my $allstart = time();
+my ($start, $stop);
+
+sub endsect()
+{
+    $stop = time();
+    if ($start) {
+	printf " %s %s\n", mstime($stop - $start, 500, 1000), colourize("ok");
+    }
+}
 
 while (<$fh>)
 {
@@ -85,16 +110,13 @@ while (<$fh>)
     if (/^\s*Testing "(.*)" in (.*):\s*$/)
     {
         alarm(120);
-    
 	my ($sect, $file) = ($1, $2);
 	
-	if ($insection) {
-	    printf " %s\n", colourize("ok");
-	}
+	endsect();
 	
 	printf("! %s  %s: ", $file, $sect);
 	@log = ();
-	$insection = 1;
+	$start = $stop;
     }
     elsif (/^!\s*(.*?)\s+(\S+)\s*$/)
     {
@@ -103,10 +125,10 @@ while (<$fh>)
 	my ($name, $result) = ($1, $2);
 	my $pass = ($result eq "ok");
 	
-	if (!$insection) {
+	if (!$start) {
 	    printf("\n! Startup: ");
+	    $start = time();
 	}
-	$insection++;
 	
 	push @log, resultline($name, $result);
 	
@@ -127,9 +149,7 @@ while (<$fh>)
     }
 }
 
-if ($insection) {
-    printf " %s\n", colourize("ok");
-}
+endsect();
 
 my $newpid = waitpid($pid, 0);
 if ($newpid != $pid) {
@@ -152,8 +172,9 @@ if ($code != 0) {
 }
 
 my $gtotal = $gpasses+$gfails;
-printf("\nWvTest: %d test%s, %d failure%s.\n",
+printf("\nWvTest: %d test%s, %d failure%s, total time %s.\n",
     $gtotal, $gtotal==1 ? "" : "s",
-    $gfails, $gfails==1 ? "" : "s");
+    $gfails, $gfails==1 ? "" : "s",
+    mstime(time() - $allstart, 2000, 5000));
 print STDERR "\nWvTest result code: $ret\n";
 exit( $ret ? $ret : ($gfails ? 125 : 0) );
