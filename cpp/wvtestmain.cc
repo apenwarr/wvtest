@@ -1,6 +1,7 @@
 #include "wvtest.h"
-#include "wvcrash.h"
-#include "wvstring.h"
+#ifdef HAVE_WVCRASH
+# include "wvcrash.h"
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #ifdef _WIN32
@@ -50,7 +51,8 @@ static int fd_count(const char *when)
 
 int main(int argc, char **argv)
 {
-#ifdef _WIN32
+    char buf[200];
+#if defined(_WIN32) && defined(HAVE_WVCRASH)
     setup_console_crash();
 #endif
 
@@ -76,7 +78,10 @@ int main(int argc, char **argv)
 	WVPASS(startfd == endfd);
 #ifndef _WIN32
 	if (startfd != endfd)
-	    system(WvString("ls -l /proc/%s/fd", getpid()));
+	{
+	    sprintf(buf, "ls -l /proc/%d/fd", getpid());
+	    system(buf);
+	}
 #endif    
     }
     

@@ -12,6 +12,10 @@
 #ifndef __WVTEST_H
 #define __WVTEST_H
 
+#ifndef WVTEST_CONFIGURED
+# error "Missing settings: HAVE_VALGRIND_MEMCHECK_H HAVE_WVCRASH WVTEST_CONFIGURED"
+#endif
+
 #include <time.h>
 
 class WvTest
@@ -58,6 +62,8 @@ public:
     WvTest::start_check(__FILE__, __LINE__, "NOT(" #cond ")", !(cond))
 #define WVFAILEQ(a, b) \
     WvTest::start_check_eq(__FILE__, __LINE__, (a), (b), false)
+#define WVPASSNE(a, b) WVFAILEQ(a, b)
+#define WVFAILNE(a, b) WVPASSEQ(a, b)
 
 #define WVTEST_MAIN3(descr, ff, ll, slowness) \
     static void _wvtest_main_##ll(); \

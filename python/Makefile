@@ -9,3 +9,6 @@ runtests:
 
 test:
 	../wvtestrunner.pl $(MAKE) runtests
+
+clean::
+	rm -f *~ t/*~ *.pyc t/*.pyc

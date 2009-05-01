@@ -5,7 +5,6 @@
  * Part of an automated testing framework.  See wvtest.h.
  */
 #include "wvtest.h"
-#include "wvautoconf.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
