@@ -7,20 +7,6 @@ SHELL=/bin/bash
 # our C# (.cs) files
 CSCPP=cpp
 
-# Cygwin supports symlinks, but they aren't actually useful outside cygwin,
-# so let's just copy instead.  We also use Microsoft's .net compiler instead
-# of mono.
-ifeq ($(OS),Windows_NT)
-  CSC?=csc
-  SYMLINK=cp
-  MONORUN=
-else
-  CSC?=gmcs -langversion:linq
-  SYMLINK=ln -sf
-  PKGS += /r:Mono.Posix
-  MONORUN=mono --debug
-endif
-
 CSFLAGS=/warn:4 /debug
 #CSFLAGS += /warnaserror
 
@@ -46,38 +32,3 @@ include $(patsubst %.cs.E,%.d,$(filter %.cs.E,$(FILES)))
 		| sed -e 's,^#include,//#include,' \
 		| grep -v '^# [0-9]' \
 		>$@ || (rm -f $@ && exit 1)
-
-
-define csbuild
-	@for d in $(filter ../%.dll,$^); do \
-		rm -f $$(basename $$d); \
-		$(SYMLINK) -v $$d .; \
-	done
-	$(CSC) $(CSFLAGS) /target:$1 /out:$@ \
-		$(PKGS) \
-		$(filter %.cs.E %.cs,$^) \
-		$(patsubst %.dll,/r:%.dll,$(filter %.dll,$^))
-endef
-
-
-%.dll: assemblyinfo.cs
-	$(call csbuild,library)
-
-# This must come before the %.cs rule, since %.cs.E files are better.
-%.exe: %.cs.E
-	$(call csbuild,exe)
-
-%.exe: %.cs
-	$(call csbuild,exe)
-
-%: %.exe
-	rm -f $@
-	$(SYMLINK) $< $@
-
-%.pass: %.exe
-	rm -f $@
-	$(TESTRUNNER) $(MONORUN) ./$^
-	touch $@
-
-clean::
-	rm -f *~ *.E *.d *.exe *.dll *.mdb *.pdb
