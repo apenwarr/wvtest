@@ -7,11 +7,6 @@ SHELL=/bin/bash
 # our C# (.cs) files
 CSCPP=cpp
 
-CSFLAGS=/warn:4 /debug
-#CSFLAGS += /warnaserror
-
-TESTRUNNER=$(WVDOTNET)/wvtestrunner.pl
-
 # Rules for generating autodependencies on header files
 $(patsubst %.cs.E,%.d,$(filter %.cs.E,$(FILES))): %.d: %.cs
 	@echo Generating dependency file $@ for $<

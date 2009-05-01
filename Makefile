@@ -10,7 +10,7 @@ runtests:
 	make -C cpp runtests
 	
 test:
-	./wvtestrunner.pl $(MAKE) runtests
+	./wvtestrunner $(MAKE) runtests
 
 clean::
 	rm -f *~ .*~

@@ -8,7 +8,7 @@ runtests:
 		$(patsubst ./%t,%t/*.py,$(shell find -type d -name t))
 
 test:
-	../wvtestrunner.pl $(MAKE) runtests
+	../wvtestrunner $(MAKE) runtests
 
 clean::
 	rm -f *~ t/*~ *.pyc t/*.pyc

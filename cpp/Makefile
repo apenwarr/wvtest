@@ -10,7 +10,7 @@ runtests: t/wvtest
 	t/wvtest
 
 test:
-	../wvtestrunner.pl $(MAKE) runtests
+	../wvtestrunner $(MAKE) runtests
 	
 clean::
 	rm -f *~ t/*~ *.o t/*.o t/wvtest

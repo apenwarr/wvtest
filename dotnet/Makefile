@@ -13,7 +13,7 @@ runtests: t/test.exe
 	cd t && mono --debug test.exe
 	
 test:
-	../wvtestrunner.pl $(MAKE) runtests
+	../wvtestrunner $(MAKE) runtests
 
 clean::
 	rm -f *~ t/*~ .*~ *.E t/*.E *.d t/*.d t/*.exe t/*.mdb
