@@ -1,0 +1,10 @@
+*~
+*.o
+*.a
+*.lib
+*.dll
+*.exe
+*.so
+*.so.*
+*.pyc
+*.mdb
