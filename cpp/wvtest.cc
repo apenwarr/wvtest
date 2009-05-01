@@ -1,8 +1,8 @@
 /*
- * Worldvisions Weaver Software:
- *   Copyright (C) 1997-2003 Net Integration Technologies, Inc.
- *
- * Part of an automated testing framework.  See wvtest.h.
+ * WvTest:
+ *   Copyright (C) 1997-2009 Net Integration Technologies, Inc.
+ *       Licensed under the GNU Library General Public License, version 2.
+ *       See the included file named LICENSE for license information.
  */
 #include "wvtest.h"
 #include <stdio.h>

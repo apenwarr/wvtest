@@ -1,3 +1,9 @@
+#
+# WvTest:
+#   Copyright (C)2009 EQL Data Inc. and contributors.
+#       Licensed under the GNU Library General Public License, version 2.
+#       See the included file named LICENSE for license information.
+#
 import traceback
 import os.path
 import re

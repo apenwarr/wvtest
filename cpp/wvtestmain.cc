@@ -1,3 +1,9 @@
+/*
+ * WvTest:
+ *   Copyright (C) 1997-2009 Net Integration Technologies, Inc.
+ *       Licensed under the GNU Library General Public License, version 2.
+ *       See the included file named LICENSE for license information.
+ */
 #include "wvtest.h"
 #ifdef HAVE_WVCRASH
 # include "wvcrash.h"

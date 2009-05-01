@@ -1,13 +1,8 @@
 /* -*- Mode: C++ -*-
- * Worldvisions Weaver Software:
- *   Copyright (C) 1997-2003 Net Integration Technologies, Inc.
- *
- * Part of an automated testing framework.  You can declare a "test function"
- * using WVTEST_MAIN, and call WVPASS and WVFAIL from there.  These produce
- * formatted data on stdout that can be read by external testrunner scripts.
- * 
- * More than one WVTEST_MAIN is allowed in a single program, and they all
- * get run.
+ * WvTest:
+ *   Copyright (C) 1997-2009 Net Integration Technologies, Inc.
+ *       Licensed under the GNU Library General Public License, version 2.
+ *       See the included file named LICENSE for license information.
  */ 
 #ifndef __WVTEST_H
 #define __WVTEST_H

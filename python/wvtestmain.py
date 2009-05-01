@@ -1,4 +1,10 @@
 #!/usr/bin/python
+#
+# WvTest:
+#   Copyright (C)2009 EQL Data Inc. and contributors.
+#       Licensed under the GNU Library General Public License, version 2.
+#       See the included file named LICENSE for license information.
+#
 import wvtest
 import sys, imp, types, os, os.path
 import traceback
