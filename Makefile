@@ -13,6 +13,7 @@ test:
 	./wvtestrunner.pl $(MAKE) runtests
 
 clean::
+	rm -f *~ .*~
 	make -C python clean
 	make -C dotnet clean
 	make -C cpp clean

@@ -16,5 +16,5 @@ test:
 	../wvtestrunner.pl $(MAKE) runtests
 
 clean::
-	rm -f *~ t/*~ *.E t/*.E *.d t/*.d t/*.exe t/*.mdb
+	rm -f *~ t/*~ .*~ *.E t/*.E *.d t/*.d t/*.exe t/*.mdb
 

@@ -13,4 +13,4 @@ test:
 	../wvtestrunner.pl $(MAKE) runtests
 	
 clean::
-	rm -f *~ *.o t/*.o t/wvtest
+	rm -f *~ t/*~ *.o t/*.o t/wvtest
