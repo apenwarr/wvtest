@@ -12,6 +12,7 @@
 #endif
 
 #include <time.h>
+#include <string>
 
 class WvTest
 {
@@ -39,6 +40,9 @@ public:
         { start(file, line, condstr); check(cond); return cond; }
     static bool start_check_eq(const char *file, int line,
 			       const char *a, const char *b, bool expect_pass);
+    static bool start_check_eq(const char *file, int line,
+			       const std::string &a, const std::string &b, 
+                               bool expect_pass);
     static bool start_check_eq(const char *file, int line, int a, int b,
                                bool expect_pass);
     static bool start_check_lt(const char *file, int line,
