@@ -4,7 +4,7 @@ all:
 	@false
 
 runtests:
-	python wvtestmain.py \
+	./wvtest.py \
 		$(patsubst ./%t,%t/*.py,$(shell find -type d -name t))
 
 test:

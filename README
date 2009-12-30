@@ -172,7 +172,7 @@ WvTest provides a simple perl script called wvtestrun, which
 runs a test program and parses its output.  It works like this:
 
 	cd python
-	../wvtestrun python ./wvtestmain.py t/twvtest.py
+	../wvtestrun ./wvtest.py t/twvtest.py
 
 (Why can't we just pipe the output to wvtestrun, instead of
  having wvtestrun run the test program?  Three reasons: first, a
@@ -298,7 +298,7 @@ With python, since there's no linker, you have to just tell it
 which files to run:
 
 	cd python
-	../wvtestrun ./wvtestmain.py ...filenames...
+	../wvtestrun ./wvtest.py ...filenames...
 
 
 What else can parse WvTest output?
