@@ -382,6 +382,14 @@ bool WvTest::start_check_eq(const char *file, int line,
 }
 
 
+bool WvTest::start_check_eq(const char *file, int line,
+			    const std::string &a, const std::string &b, 
+                            bool expect_pass)
+{
+    return start_check_eq(file, line, a.c_str(), b.c_str(), expect_pass);
+}
+
+
 bool WvTest::start_check_eq(const char *file, int line, 
                             int a, int b, bool expect_pass)
 {
