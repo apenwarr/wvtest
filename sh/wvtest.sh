@@ -99,6 +99,22 @@ WVPASSNE()
 }
 
 
+WVPASSRC()
+{
+	RC=$?
+	_wvfind_caller
+	_wvcheck $(_wvgetrv [ $RC -eq 0 ]) "return code($RC) == 0"
+}
+
+
+WVFAILRC()
+{
+	RC=$?
+	_wvfind_caller
+	_wvcheck $(_wvgetrv [ $RC -ne 0 ]) "return code($RC) != 0"
+}
+
+
 WVSTART()
 {
 	echo >&2
