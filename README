@@ -259,9 +259,10 @@ Sample code is provided for these languages:
 	C++: try typing "cd cpp; make test"
 	C# (mono): try typing "cd dotnet; make test"
 	Python: try typing "cd python; make test"
+	Shell: try typing "cd sh; make test"
 	
 There's no point explaining the syntax here, because it's really
-simple.  Just look inside the cpp, dotnet, and python
+simple.  Just look inside the cpp, dotnet, python, and sh
 directories to learn how the tests are written.
 
 

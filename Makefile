@@ -5,15 +5,18 @@ all:
 	@echo "Try: make test"
 	
 runtests:
-	make -C python runtests
-	make -C dotnet runtests
-	make -C cpp runtests
+	$(MAKE) -C sh runtests
+	$(MAKE) -C python runtests
+	$(MAKE) -C dotnet runtests
+	$(MAKE) -C cpp runtests
+	
 	
 test:
 	./wvtestrun $(MAKE) runtests
 
 clean::
 	rm -f *~ .*~
-	make -C python clean
-	make -C dotnet clean
-	make -C cpp clean
+	$(MAKE) -C sh clean
+	$(MAKE) -C python clean
+	$(MAKE) -C dotnet clean
+	$(MAKE) -C cpp clean
