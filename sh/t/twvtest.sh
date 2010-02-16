@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 . ./wvtest.sh
 
 WVSTART "main test"
