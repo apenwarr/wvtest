@@ -2,12 +2,16 @@ from wvtest import *
 
 last=None
 
+def _except(*args):
+    raise Exception(*args)
+
 @wvtest
 def test1():
     WVPASSLT(1, 2)
     WVPASSLE(1, 1)
     WVPASSGT(2, 1)
     WVPASSGE(2, 2)
+    WVEXCEPT(Exception, _except, 'my exception parameter')
     
     # ensure tests run in the order they were declared
     global last

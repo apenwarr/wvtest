@@ -49,40 +49,56 @@ if __name__ != "__main__":   # we're imported as a module
     
     
     def WVPASS(cond = True):
-        ''' Throws an exception unless cond is true. '''
+        ''' Counts a test failure unless cond is true. '''
         return _check(cond, _code())
     
     def WVFAIL(cond = True):
-        ''' Throws an exception unless cond is false. '''
+        ''' Counts a test failure  unless cond is false. '''
         return _check(not cond, 'NOT(%s)' % _code())
     
     def WVPASSEQ(a, b):
-        ''' Throws an exception unless a == b. '''
+        ''' Counts a test failure unless a == b. '''
         return _check(a == b, '%s == %s' % (repr(a), repr(b)))
     
     def WVPASSNE(a, b):
-        ''' Throws an exception unless a != b. '''
+        ''' Counts a test failure unless a != b. '''
         return _check(a != b, '%s != %s' % (repr(a), repr(b)))
     
     def WVPASSLT(a, b):
-        ''' Throws an exception unless a < b. '''
+        ''' Counts a test failure unless a < b. '''
         return _check(a < b, '%s < %s' % (repr(a), repr(b)))
     
     def WVPASSLE(a, b):
-        ''' Throws an exception unless a <= b. '''
+        ''' Counts a test failure unless a <= b. '''
         return _check(a <= b, '%s <= %s' % (repr(a), repr(b)))
     
     def WVPASSGT(a, b):
-        ''' Throws an exception unless a > b. '''
+        ''' Counts a test failure unless a > b. '''
         return _check(a > b, '%s > %s' % (repr(a), repr(b)))
     
     def WVPASSGE(a, b):
-        ''' Throws an exception unless a >= b. '''
+        ''' Counts a test failure unless a >= b. '''
         return _check(a >= b, '%s >= %s' % (repr(a), repr(b)))
+
+    def WVEXCEPT(etype, func, *args, **kwargs):
+        ''' Counts a test failure unless func throws an 'etype' exception.
+            You have to spell out the function name and arguments, rather than
+            calling the function yourself, so that WVEXCEPT can run before
+            your test code throws an exception.
+        '''
+        try:
+            func(*args, **kwargs)
+        except etype, e:
+            return _check(True, 'EXCEPT(%s)' % _code())
+        except:
+            _check(False, 'EXCEPT(%s)' % _code())
+            raise
+        else:
+            return _check(False, 'EXCEPT(%s)' % _code())
 
 else:  # we're the main program
     # NOTE
-    # Why do we do this in such  convoluted way?  Because if you run
+    # Why do we do this in such a convoluted way?  Because if you run
     # wvtest.py as a main program and it imports your test files, then
     # those test files will try to import the wvtest module recursively.
     # That actually *works* fine, because we don't run this main program
