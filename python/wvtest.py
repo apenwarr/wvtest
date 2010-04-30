@@ -125,7 +125,7 @@ else:  # we're the main program
             print
             print traceback.format_exc()
             tb = sys.exc_info()[2]
-            wvtest._result(e, traceback.extract_tb(tb)[-1],
+            wvtest._result(e, traceback.extract_tb(tb)[1],
                            'EXCEPTION')
             
     # main code
