@@ -32,3 +32,7 @@ def booga1():
     WVPASSEQ(last, 'booga2')
     last='booga1'
 
+
+@wvtest
+def chdir_test():
+    WVPASS(open('testfile.txt')) # will fail if chdir is wrong

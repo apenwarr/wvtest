@@ -137,11 +137,20 @@ else:  # we're the main program
             modname = modname[:-3]
         print 'Importing: %s' % modname
         wvtest._registered = []
-        mod = __import__(modname.replace('/', '.'), None, None, [])
-
-        for t in wvtest._registered:
-            _runtest(modname, t.func_name, t)
-            print
+        oldwd = os.getcwd()
+        oldpath = sys.path
+        try:
+            modpath = os.path.abspath(modname).split('/')[:-1]
+            os.chdir('/'.join(modpath))
+            sys.path += ['/'.join(modpath),
+                         '/'.join(modpath[:-1])]
+            mod = __import__(modname.replace('/', '.'), None, None, [])
+            for t in wvtest._registered:
+                _runtest(modname, t.func_name, t)
+                print
+        finally:
+            os.chdir(oldwd)
+            sys.path = oldpath
 
     print
     print 'WvTest: %d tests, %d failures.' % (wvtest._tests, wvtest._fails)
