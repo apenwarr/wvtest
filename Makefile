@@ -1,17 +1,20 @@
 
-all:
-	@echo "There's nothing to build here except the tests."
+all: build
 	@echo
 	@echo "Try: make test"
 	
-runtests:
+build:
+	$(MAKE) -C dotnet all
+	$(MAKE) -C cpp all
+	
+runtests: build
 	$(MAKE) -C sh runtests
 	$(MAKE) -C python runtests
 	$(MAKE) -C dotnet runtests
 	$(MAKE) -C cpp runtests
 	
 	
-test:
+test: build
 	./wvtestrun $(MAKE) runtests
 
 clean::

@@ -1,15 +1,13 @@
 
-all:
-	@echo "Try: make test"
-	@false
-	
+all: t/wvtest
+
 t/wvtest: wvtestmain.cc wvtest.cc t/wvtest.t.cc
 	g++ -D WVTEST_CONFIGURED -o $@ -I. $^
 	
-runtests: t/wvtest
+runtests: all
 	t/wvtest
 
-test:
+test: all
 	../wvtestrun $(MAKE) runtests
 	
 clean::

@@ -1,7 +1,6 @@
-all:
-	@echo "Try: make test"
-	@false
-	
+
+all: t/test.exe
+
 include wvtestrules.mk
 
 CPPFLAGS=-I.
