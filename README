@@ -101,7 +101,7 @@ Here are the fundamental design goals of WvTest:
 
  - Big long scary test functions.  Some test frameworks are
    insistent about the rule that "every function should test
-   only one thing." Nobody every really explains why.  I can't
+   only one thing." Nobody ever really explains why.  I can't
    understand this; it just causes uncontrolled
    hormone-imbalance hypergrowth in your test files, and you
    have to type more stuff... and run test fixtures over and
