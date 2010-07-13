@@ -122,7 +122,7 @@ The WvTest Protocol
 -------------------
 
 WvTest is a protocol, not really an API.  As it happens, the
-WvTest project includes several (currently three)
+WvTest project includes several (currently four)
 implementations of APIs that produce data in the WvTest format,
 but it's super easy to add your own.
 
