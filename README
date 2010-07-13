@@ -2,7 +2,7 @@
 WvTest: the dumbest cross-platform test framework that could possibly work
 ==========================================================================
 
-I have a problem with your unit testing framework.  Yes, you. 
+I have a problem with your unit testing framework.  Yes, you.
 The person reading this.  No, don't look away guiltily.  You
 know your unit testing framework sucks.  You know it has a
 million features you don't understand.  You know you hate it,
@@ -20,7 +20,7 @@ Here are the fundamental design goals of WvTest:
 
  - Be the stupidest thing that can possibly work.  People are
    way, way too serious about their testing frameworks.  Some
-   people build testing frameworks as their *full time job*. 
+   people build testing frameworks as their *full time job*.
    This is ridiculous.  A test framework, at its core, only does
    one thing: it runs a program that returns true or false.  If
    it's false, you lose.  If it's true, you win.  Everything
@@ -34,17 +34,17 @@ Here are the fundamental design goals of WvTest:
    produce WvTest-compatible output if you want (although I've
    never done this, so you'll have to do it yourself).  I'll
    describe the protocol below.
-   
- - Work with multiple languages on multiple operating systems. 
+
+ - Work with multiple languages on multiple operating systems.
    I'm a programmer who programs on Linux, MacOS, and Windows,
    to name just three, and I write in lots of programming
-   languages, including C, C++, C#, Python, Perl, and others. 
+   languages, including C, C++, C#, Python, Perl, and others.
    And worse, some of my projects use *multiple* languages and I
    want to have unit tests for *all* of them.  I don't know of
    any unit testing framework - except maybe some horrendously
    overdesigned ones - that work with multiple languages at
    once.  WvTest does.
-   
+
  - NO UNNECESSARY OBJECT ORIENTATION.  The big unit testing
    craze seems to have been started by JUnit in Java, which is
    object-oriented.  Now, that's not a misdesign in JUnit; it's
@@ -61,26 +61,26 @@ Here are the fundamental design goals of WvTest:
    that, then that's great; WvTest doesn't care.  And yes, you
    can assert whether two variables are equal even if your
    function *isn't* in a particular class, just as God intended.
-   
+
  - Don't make me name or describe my individual tests.  How many
    times have you seen this?
-       
+
        assertTrue(thing.works(), "thing didn't work!");
-       
+
    The reasoning there is that if the test fails, we want to be
    able to print a user-friendly error message that describes
    why.  Right?  NO!!  That is *awful*.  That just *doubled* the
-   amount of work you have to do in order to write a test. 
+   amount of work you have to do in order to write a test.
    Instead, WvTest auto-generates output including the line
    number of the test and the code on that line.  So you get a
    message like this:
-   
+
        ! mytest.t.cc:431  thing.works()    FAILED
 
    and all you have to write is this:
-   
+
        WVPASS(thing.works());
-       
+
    (WVPASS is all-caps because it's a macro in C++, but also
     because you want your tests to stand out.  That's what
     you'll be looking for when it fails, after all.  And don't
@@ -106,7 +106,7 @@ Here are the fundamental design goals of WvTest:
    hormone-imbalance hypergrowth in your test files, and you
    have to type more stuff... and run test fixtures over and
    over.
-   
+
    My personal theory for why people hate big long test
    functions: it's because their assertTrue() implementation
    doesn't say which test failed, so they'd like the *name of
@@ -132,7 +132,7 @@ The format is really simple too.  It looks like this:
 	! mytest.t.cc:432     thing.works()         ok
 	This is just some crap that I printed while counting to 3.
 	! mytest.t.cc.433     3 < 4                 FAILED
-	
+
 There are only four kinds of lines in WvTest, and each of the
 lines above corresponds to one of them:
 
@@ -140,7 +140,7 @@ lines above corresponds to one of them:
    Testing (no leading whitespace) and then has a test function
    name in double quotes, then "in", then the filename, and then
    colon, marks the beginning of a test function.
-   
+
  - A passing assertion.  Any line that starts with ! and ends with
    " ok" (whitespace, the word "ok", and a newline) indicates
    one assertion that passed.  The first "word" on that line is
@@ -148,7 +148,7 @@ lines above corresponds to one of them:
    as it doesn't contain any whitespace).  Everything between the
    name and the ok is just some additional user-readable detail
    about the test that passed.
-   
+
  - Random filler.  If it doesn't start with an ! and it doesn't
    look like a header, then it's completely ignored by anything
    using WvTest.  Your program can print all the debug output it
@@ -163,7 +163,7 @@ lines above corresponds to one of them:
    FAILED here, but sometimes it's EXCEPTION, and it could be
    something else instead, if you invent a new and improved way
    to fail.
-   
+
 
 Reading the WvTest Protocol: wvtestrun
 --------------------------------------
@@ -178,13 +178,13 @@ runs a test program and parses its output.  It works like this:
  having wvtestrun run the test program?  Three reasons: first, a
  fancier version of wvtestrun could re-run the tests several
  times or give a GUI that lets you re-run the test when you push
- a button.  Second, it handles stdout and stderr separately. 
+ a button.  Second, it handles stdout and stderr separately.
  And third, it can kill the test program if it gets stuck
  without producing test output for too long.)
 
 If we put the sample output from the previous section through
 wvtestrun (and changed the FAILED to ok), it would produce this:
-	
+
 	$ ./wvtestrun cat sample-ok
 
 	Testing "all" in cat sample-ok:
@@ -196,12 +196,12 @@ wvtestrun (and changed the FAILED to ok), it would produce this:
 
 What happened here?  Well, wvtestrun took each test header (in
 this case, there's just one, which said we're testing "my test
-function" in mytest.t.cc) and turns it into a single test line. 
+function" in mytest.t.cc) and turns it into a single test line.
 Then it prints a dot for each assertion in that test function,
 tells you the total time to run that function, and prints 'ok'
 if the entire test function failed.
 
-Note that the output of wvtestrun is *also* valid WvTest output. 
+Note that the output of wvtestrun is *also* valid WvTest output.
 That means you can use wvtestrun in your 'make test' target in a
 subdirectory, and still use wvtestrun as the 'make test' runner
 in the parent directory as well.  As long as your top-level
@@ -245,7 +245,7 @@ then the failing, test functions:
 	WvTest: 4 tests, 1 failure, total time 0.000s.
 
 	WvTest result code: 0
-	
+
 Notice how the messages from sample-ok are condensed; only the
 details from sample-error are expanded out, because only that
 output is interesting.
@@ -260,7 +260,7 @@ Sample code is provided for these languages:
 	C# (mono): try typing "cd dotnet; make test"
 	Python: try typing "cd python; make test"
 	Shell: try typing "cd sh; make test"
-	
+
 There's no point explaining the syntax here, because it's really
 simple.  Just look inside the cpp, dotnet, python, and sh
 directories to learn how the tests are written.
@@ -328,14 +328,14 @@ What does the "Wv" stand for?
 	Foundations.
 
 	It does *not* stand for World Vision (sigh) or West Virginia.
-	
+
 Who owns the copyright?
 
 	While I (Avery) wrote most of the WvTest framework in C++, C#, and
 	Python, and I also wrote wvtestrunner, the actual code I wrote is
 	owned by whichever company I wrote it for at the time.  For the most
 	part, this means:
-	
+
 	C++: Net Integration Technologies, Inc. (now part of IBM)
 	C#: Versabanq Innovations Inc.
 	Python: EQL Data Inc.
@@ -344,7 +344,7 @@ What can I do with it?
 
 	WvTest is distributed under the terms of the GNU LGPLv2.  See the
 	file LICENSE for more information.
-	
+
 	Basically this means you can use it for whatever you want, but if
 	you change it, you probably need to give your changes back to the
 	world.  If you *use* it in your program (which is presumably a test
@@ -352,7 +352,7 @@ What can I do with it?
 	WvTest itself.  But read the LICENSE in detail to be sure.
 
 Where did you get the awesome idea to use a protocol instead of an API?
-	
+
 	The perl source code (not to be confused with perlunit)
 	did a similar trick for the perl interpreter's unit
 	test, although in a less general way.  Naturally, you
@@ -362,12 +362,12 @@ Where did you get the awesome idea to use a protocol instead of an API?
 Who should I complain to about WvTest?
 
 	Email me at: Avery Pennarun <apenwarr@gmail.com>
-	
+
 	I will be happy to read your complaints, because I actually really
-	like it when people use my programs, especially if they hate them. 
+	like it when people use my programs, especially if they hate them.
 	It fills the loneliness somehow and prevents me from writing bad
 	poetry like this:
-	
+
 		Testing makes me gouge out my eyes
 		But with WvTest, it takes fewer tries.
 		WvTest is great, wvtest is fun!

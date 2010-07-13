@@ -47,7 +47,7 @@ static int memleaks()
     printf("memleaks: sure:%d dubious:%d reachable:%d suppress:%d\n",
 	   leaked, dubious, reachable, suppressed);
     fflush(stdout);
-    
+
     // dubious+reachable are normally non-zero because of globals...
     // return leaked+dubious+reachable;
     return leaked;
@@ -65,7 +65,7 @@ static bool no_running_children()
     pid_t wait_result;
 
     // Acknowledge and complain about any zombie children
-    do 
+    do
     {
 	int status = 0;
         wait_result = waitpid(-1, &status, WNOHANG);
@@ -78,7 +78,7 @@ static bool no_running_children()
             WVFAILEQ("Unclaimed dead child process", buf);
         }
     } while (wait_result > 0);
-        
+
     // There should not be any running children, so waitpid should return -1
     WVPASSEQ(errno, ECHILD);
     WVPASSEQ(wait_result, -1);
@@ -115,9 +115,9 @@ static const char *pathstrip(const char *filename)
 
 WvTest::WvTest(const char *_descr, const char *_idstr, MainFunc *_main,
 	       int _slowness) :
-    descr(_descr), 
-    idstr(pathstrip(_idstr)), 
-    main(_main), 
+    descr(_descr),
+    idstr(pathstrip(_idstr)),
+    main(_main),
     slowness(_slowness),
     next(NULL)
 {
@@ -144,9 +144,9 @@ int WvTest::run_all(const char * const *prefixes)
 {
     int old_valgrind_errs = 0, new_valgrind_errs;
     int old_valgrind_leaks = 0, new_valgrind_leaks;
-    
+
 #ifdef _WIN32
-    /* I should be doing something to do with SetTimer here, 
+    /* I should be doing something to do with SetTimer here,
      * not sure exactly what just yet */
 #else
     char *disable(getenv("WVTEST_DISABLE_TIMEOUT"));
@@ -157,14 +157,14 @@ int WvTest::run_all(const char * const *prefixes)
     alarm(MAX_TEST_TIME);
 #endif
     start_time = time(NULL);
-    
+
     // make sure we can always start out in the same directory, so tests have
     // access to their files.  If a test uses chdir(), we want to be able to
     // reverse it.
     char wd[1024];
     if (!getcwd(wd, sizeof(wd)))
 	strcpy(wd, ".");
-    
+
     const char *slowstr1 = getenv("WVTEST_MIN_SLOWNESS");
     const char *slowstr2 = getenv("WVTEST_MAX_SLOWNESS");
     int min_slowness = 0, max_slowness = 65535;
@@ -175,7 +175,7 @@ int WvTest::run_all(const char * const *prefixes)
     run_twice = false;
 #else
     char *parallel_str = getenv("WVTEST_PARALLEL");
-    if (parallel_str) 
+    if (parallel_str)
         run_twice = atoi(parallel_str) > 0;
 #endif
 
@@ -207,18 +207,18 @@ int WvTest::run_all(const char * const *prefixes)
 
 	    printf("\nTesting \"%s\" in %s:\n", cur->descr, cur->idstr);
 	    fflush(stdout);
-	    
+
 	    cur->main();
 	    chdir(wd);
-	    
+
 	    new_valgrind_errs = memerrs();
 	    WVPASS(new_valgrind_errs == old_valgrind_errs);
 	    old_valgrind_errs = new_valgrind_errs;
-	    
+
 	    new_valgrind_leaks = memleaks();
 	    WVPASS(new_valgrind_leaks == old_valgrind_leaks);
 	    old_valgrind_leaks = new_valgrind_leaks;
-	    
+
 	    fflush(stderr);
 	    printf("\n");
 	    fflush(stdout);
@@ -236,7 +236,7 @@ int WvTest::run_all(const char * const *prefixes)
                 {
                     printf("Waiting for child to exit.\n");
                     int result;
-                    while ((result = waitpid(child, NULL, 0)) == -1 && 
+                    while ((result = waitpid(child, NULL, 0)) == -1 &&
                             errno == EINTR)
                         printf("Waitpid interrupted, retrying.\n");
                 }
@@ -246,9 +246,9 @@ int WvTest::run_all(const char * const *prefixes)
             WVPASS(no_running_children());
 	}
     }
-    
+
     WVPASS(runs > 0);
-    
+
     if (prefixes && *prefixes && **prefixes)
 	printf("WvTest: WARNING: only ran tests starting with "
 	       "specifed prefix(es).\n");
@@ -258,7 +258,7 @@ int WvTest::run_all(const char * const *prefixes)
 	   runs, runs==1 ? "" : "s",
 	   fails, fails==1 ? "": "s");
     fflush(stdout);
-    
+
     return fails != 0;
 }
 
@@ -274,18 +274,18 @@ int WvTest::run_all(const char * const *prefixes)
 // the test is done and we can output it all at once.
 //
 // Yes, this is probably the worst API of all time.
-void WvTest::print_result(bool start, const char *_file, int _line, 
+void WvTest::print_result(bool start, const char *_file, int _line,
         const char *_condstr, bool result)
 {
     static char *file;
     static char *condstr;
     static int line;
-    
+
     if (start)
     {
-        if (file) 
+        if (file)
             free(file);
-        if (condstr) 
+        if (condstr)
             free(condstr);
         file = strdup(pathstrip(_file));
         condstr = strdup(_condstr);
@@ -297,7 +297,7 @@ void WvTest::print_result(bool start, const char *_file, int _line,
                 *cptr = '!';
         }
     }
-            
+
     const char *result_str = result ? "ok\n" : "FAILED\n";
     if (run_twice)
     {
@@ -337,7 +337,7 @@ void WvTest::check(bool cond)
     alarm(MAX_TEST_TIME); // restart per-test timeout
 #endif
     if (!start_time) start_time = time(NULL);
-    
+
     if (time(NULL) - start_time > MAX_TOTAL_TIME)
     {
 	printf("\n! WvTest   Total run time exceeded %d seconds!  FAILED\n",
@@ -345,7 +345,7 @@ void WvTest::check(bool cond)
 	fflush(stdout);
 	abort();
     }
-    
+
     runs++;
 
     print_result(false, NULL, 0, NULL, cond);
@@ -353,7 +353,7 @@ void WvTest::check(bool cond)
     if (!cond)
     {
 	fails++;
-	
+
 	if (getenv("WVTEST_DIE_FAST"))
 	    abort();
     }
@@ -365,14 +365,14 @@ bool WvTest::start_check_eq(const char *file, int line,
 {
     if (!a) a = "";
     if (!b) b = "";
-    
+
     size_t len = strlen(a) + strlen(b) + 8 + 1;
     char *str = new char[len];
     sprintf(str, "[%s] %s [%s]", a, expect_pass ? "==" : "!=", b);
-    
+
     start(file, line, str);
     delete[] str;
-    
+
     bool cond = !strcmp(a, b);
     if (!expect_pass)
         cond = !cond;
@@ -383,23 +383,23 @@ bool WvTest::start_check_eq(const char *file, int line,
 
 
 bool WvTest::start_check_eq(const char *file, int line,
-			    const std::string &a, const std::string &b, 
+			    const std::string &a, const std::string &b,
                             bool expect_pass)
 {
     return start_check_eq(file, line, a.c_str(), b.c_str(), expect_pass);
 }
 
 
-bool WvTest::start_check_eq(const char *file, int line, 
+bool WvTest::start_check_eq(const char *file, int line,
                             int a, int b, bool expect_pass)
 {
     size_t len = 128 + 128 + 8 + 1;
     char *str = new char[len];
     sprintf(str, "%d %s %d", a, expect_pass ? "==" : "!=", b);
-    
+
     start(file, line, str);
     delete[] str;
-    
+
     bool cond = (a == b);
     if (!expect_pass)
         cond = !cond;
@@ -414,11 +414,11 @@ bool WvTest::start_check_lt(const char *file, int line,
 {
     if (!a) a = "";
     if (!b) b = "";
-    
+
     size_t len = strlen(a) + strlen(b) + 8 + 1;
     char *str = new char[len];
     sprintf(str, "[%s] < [%s]", a, b);
-    
+
     start(file, line, str);
     delete[] str;
 
@@ -433,10 +433,10 @@ bool WvTest::start_check_lt(const char *file, int line, int a, int b)
     size_t len = 128 + 128 + 8 + 1;
     char *str = new char[len];
     sprintf(str, "%d < %d", a, b);
-    
+
     start(file, line, str);
     delete[] str;
-    
+
     bool cond = a < b;
     check(cond);
     return cond;

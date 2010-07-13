@@ -10,7 +10,7 @@ t/test.exe: wvtest.cs wvtestmain.cs t/wvtest.t.cs.E
 
 runtests: t/test.exe
 	cd t && mono --debug test.exe
-	
+
 test:
 	../wvtestrun $(MAKE) runtests
 

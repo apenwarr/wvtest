@@ -3,7 +3,7 @@
  *   Copyright (C) 1997-2009 Net Integration Technologies, Inc.
  *       Licensed under the GNU Library General Public License, version 2.
  *       See the included file named LICENSE for license information.
- */ 
+ */
 #ifndef __WVTEST_H
 #define __WVTEST_H
 
@@ -25,10 +25,10 @@ class WvTest
     static int fails, runs;
     static time_t start_time;
     static bool run_twice;
-    
+
     static void alarm_handler(int sig);
-   
-    static void print_result(bool start, const char *file, int line, 
+
+    static void print_result(bool start, const char *file, int line,
             const char *condstr, bool result);
 public:
     WvTest(const char *_descr, const char *_idstr, MainFunc *_main, int _slow);
@@ -41,7 +41,7 @@ public:
     static bool start_check_eq(const char *file, int line,
 			       const char *a, const char *b, bool expect_pass);
     static bool start_check_eq(const char *file, int line,
-			       const std::string &a, const std::string &b, 
+			       const std::string &a, const std::string &b,
                                bool expect_pass);
     static bool start_check_eq(const char *file, int line, int a, int b,
                                bool expect_pass);

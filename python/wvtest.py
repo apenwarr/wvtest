@@ -8,7 +8,7 @@ if __name__ != "__main__":   # we're imported as a module
     _registered = []
     _tests = 0
     _fails = 0
-    
+
     def wvtest(func):
         """ Use this decorator (@wvtest) in front of any function you want to run
             as part of the unit test suite.  Then run:
@@ -17,8 +17,8 @@ if __name__ != "__main__":   # we're imported as a module
         """
         _registered.append(func)
         return func
-    
-    
+
+
     def _result(msg, tb, code):
         global _tests, _fails
         _tests += 1
@@ -31,8 +31,8 @@ if __name__ != "__main__":   # we're imported as a module
         print '! %-70s %s' % ('%s:%-4d %s' % (filename, line, msg),
                               code)
         sys.stdout.flush()
-    
-    
+
+
     def _check(cond, msg = 'unknown', tb = None):
         if tb == None: tb = traceback.extract_stack()[-3]
         if cond:
@@ -40,42 +40,42 @@ if __name__ != "__main__":   # we're imported as a module
         else:
             _result(msg, tb, 'FAILED')
         return cond
-    
-    
+
+
     def _code():
         (filename, line, func, text) = traceback.extract_stack()[-3]
         text = re.sub(r'^\w+\((.*)\)(\s*#.*)?$', r'\1', text);
         return text
-    
-    
+
+
     def WVPASS(cond = True):
         ''' Counts a test failure unless cond is true. '''
         return _check(cond, _code())
-    
+
     def WVFAIL(cond = True):
         ''' Counts a test failure  unless cond is false. '''
         return _check(not cond, 'NOT(%s)' % _code())
-    
+
     def WVPASSEQ(a, b):
         ''' Counts a test failure unless a == b. '''
         return _check(a == b, '%s == %s' % (repr(a), repr(b)))
-    
+
     def WVPASSNE(a, b):
         ''' Counts a test failure unless a != b. '''
         return _check(a != b, '%s != %s' % (repr(a), repr(b)))
-    
+
     def WVPASSLT(a, b):
         ''' Counts a test failure unless a < b. '''
         return _check(a < b, '%s < %s' % (repr(a), repr(b)))
-    
+
     def WVPASSLE(a, b):
         ''' Counts a test failure unless a <= b. '''
         return _check(a <= b, '%s <= %s' % (repr(a), repr(b)))
-    
+
     def WVPASSGT(a, b):
         ''' Counts a test failure unless a > b. '''
         return _check(a > b, '%s > %s' % (repr(a), repr(b)))
-    
+
     def WVPASSGE(a, b):
         ''' Counts a test failure unless a >= b. '''
         return _check(a >= b, '%s >= %s' % (repr(a), repr(b)))
@@ -114,7 +114,7 @@ else:  # we're the main program
     # All this is done just so that wvtest.py can be a single file that's
     # easy to import into your own applications.
     import wvtest
-    
+
     def _runtest(modname, fname, f):
         print
         print 'Testing "%s" in %s.py:' % (fname, modname)
@@ -127,7 +127,7 @@ else:  # we're the main program
             tb = sys.exc_info()[2]
             wvtest._result(e, traceback.extract_tb(tb)[1],
                            'EXCEPTION')
-            
+
     # main code
     for modname in sys.argv[1:]:
         if not os.path.exists(modname):

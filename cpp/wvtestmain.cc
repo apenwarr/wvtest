@@ -22,7 +22,7 @@ static bool fd_is_valid(int fd)
 {
 #ifdef _WIN32
     if ((HANDLE)_get_osfhandle(fd) != INVALID_HANDLE_VALUE) return true;
-#endif    
+#endif
     int nfd = dup(fd);
     if (nfd >= 0)
     {
@@ -37,9 +37,9 @@ static bool fd_is_valid(int fd)
 static int fd_count(const char *when)
 {
     int count = 0;
-    
+
     printf("fds open at %s:", when);
-    
+
     for (int fd = 0; fd < 1024; fd++)
     {
 	if (fd_is_valid(fd))
@@ -50,7 +50,7 @@ static int fd_count(const char *when)
 	}
     }
     printf("\n");
-    
+
     return count;
 }
 
@@ -70,17 +70,17 @@ int main(int argc, char **argv)
     WVFAIL(0);
     int startfd, endfd;
     char * const *prefixes = NULL;
-    
+
     if (argc > 1)
 	prefixes = argv + 1;
-    
+
     startfd = fd_count("start");
     int ret = WvTest::run_all(prefixes);
-    
+
     if (ret == 0) // don't pollute the strace output if we failed anyway
     {
 	endfd = fd_count("end");
-    
+
 	WVPASS(startfd == endfd);
 #ifndef _WIN32
 	if (startfd != endfd)
@@ -88,9 +88,9 @@ int main(int argc, char **argv)
 	    sprintf(buf, "ls -l /proc/%d/fd", getpid());
 	    system(buf);
 	}
-#endif    
+#endif
     }
-    
+
     // keep 'make' from aborting if this environment variable is set
     if (getenv("WVTEST_NO_FAIL"))
 	return 0;

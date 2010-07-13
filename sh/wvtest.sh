@@ -50,7 +50,7 @@ _wvcheck()
 WVPASS()
 {
 	TEXT="$*"
-	
+
 	_wvfind_caller
 	if "$@"; then
 		_wvcheck 0 "$TEXT"
@@ -66,7 +66,7 @@ WVPASS()
 WVFAIL()
 {
 	TEXT="$*"
-	
+
 	_wvfind_caller
 	if "$@"; then
 		_wvcheck 1 "NOT($TEXT)"

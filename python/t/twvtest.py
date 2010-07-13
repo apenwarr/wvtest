@@ -12,7 +12,7 @@ def test1():
     WVPASSGT(2, 1)
     WVPASSGE(2, 2)
     WVEXCEPT(Exception, _except, 'my exception parameter')
-    
+
     # ensure tests run in the order they were declared
     global last
     WVPASSEQ(last, None)
@@ -24,7 +24,7 @@ def booga2():
     global last
     WVPASSEQ(last, 'test1')
     last='booga2'
-    
+
 @wvtest
 def booga1():
     # ensure tests run in the order they were declared

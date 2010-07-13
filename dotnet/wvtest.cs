@@ -25,12 +25,12 @@ namespace Wv
 		{
 		    if (!t.IsDefined(attrtype, false))
 			continue;
-		    
+
 		    yield return t;
 		}
 	    }
 	}
-	
+
 	public static IEnumerable<MethodInfo> find_methods(this Type t,
 							   Type attrtype)
 	{
@@ -38,7 +38,7 @@ namespace Wv
 	    {
 		if (!m.IsDefined(attrtype, false))
 		    continue;
-		
+
 		yield return m;
 	    }
 	}
@@ -53,20 +53,20 @@ namespace Wv.Test
 	{
 	    public string name;
 	    public Action cb;
-	    
+
 	    public TestInfo(string name, Action cb)
 	        { this.name = name; this.cb = cb; }
 	}
         List<TestInfo> tests = new List<TestInfo>();
 
         public int failures { get; private set; }
-	
+
 	public WvTest()
 	{
-	    foreach (Type t in 
+	    foreach (Type t in
 		     WvReflection.find_types(typeof(TestFixtureAttribute)))
 	    {
-		foreach (MethodInfo m in 
+		foreach (MethodInfo m in
 			 t.find_methods(typeof(TestAttribute)))
 		{
 		    // The new t2, m2 are needed so that each delegate gets
@@ -78,7 +78,7 @@ namespace Wv.Test
 				 delegate() {
 				     try {
 					 m2.Invoke(Activator.CreateInstance(t2),
-						   null); 
+						   null);
 				     } catch (TargetInvocationException e) {
 					 throw e.InnerException;
 				     }
@@ -101,7 +101,7 @@ namespace Wv.Test
         public int Run()
         {
 	    string[] args = Environment.GetCommandLineArgs();
-	    
+
 	    if (args.Length <= 1)
 		Console.WriteLine("WvTest: Running all tests");
 	    else
@@ -110,14 +110,14 @@ namespace Wv.Test
             foreach (TestInfo test in tests)
 	    {
 		string[] parts = test.name.Split(new char[] { '/' }, 2);
-		
+
 		bool runthis = (args.Length <= 1);
 		foreach (string arg in args)
 		    if (parts[0].StartsWith(arg) || parts[1].StartsWith(arg))
 			runthis = true;
-		
+
 		if (!runthis) continue;
-		
+
                 Console.WriteLine("\nTesting \"{0}\" in {1}:",
 				  parts[1], parts[0]);
 
@@ -131,9 +131,9 @@ namespace Wv.Test
                     failures++;
                 }
             }
-	    
+
 	    Console.Out.WriteLine("Result: {0} failures.", failures);
-	    
+
 	    // Return a safe unix exit code
 	    return failures > 0 ? 1 : 0;
         }
@@ -147,28 +147,28 @@ namespace Wv.Test
 	{
 	    return x != 0;
 	}
-	
+
 	public static bool booleanize(ulong x)
 	{
 	    return x != 0;
 	}
-	
+
 	public static bool booleanize(string s)
 	{
 	    return s != null && s != "";
 	}
-	
+
 	public static bool booleanize(object o)
 	{
 	    return o != null;
 	}
-	
+
 	static bool expect_fail = false;
 	public static void expect_next_failure()
 	{
 	    expect_fail = true;
 	}
-	
+
 	public static bool test(bool ok, string file, int line, string s)
 	{
 	    s = s.Replace("\n", "!");
@@ -200,7 +200,7 @@ namespace Wv.Test
 					 file, line, s, "EXCEPTION");
             Console.Out.Flush();
 	}
-	
+
 	public static bool test_eq(bool cond1, bool cond2,
 				   string file, int line,
 				   string s1, string s2)
@@ -209,7 +209,7 @@ namespace Wv.Test
 		String.Format("[{0}] == [{1}] ({{{2}}} == {{{3}}})",
 			      cond1, cond2, s1, s2));
 	}
-	
+
 	public static bool test_eq(long cond1, long cond2,
 				   string file, int line,
 				   string s1, string s2)
@@ -218,7 +218,7 @@ namespace Wv.Test
 		String.Format("[{0}] == [{1}] ({{{2}}} == {{{3}}})",
 			      cond1, cond2, s1, s2));
 	}
-	
+
 	public static bool test_eq(ulong cond1, ulong cond2,
 				   string file, int line,
 				   string s1, string s2)
@@ -227,7 +227,7 @@ namespace Wv.Test
 		String.Format("[{0}] == [{1}] ({{{2}}} == {{{3}}})",
 			      cond1, cond2, s1, s2));
 	}
-	
+
 	public static bool test_eq(double cond1, double cond2,
 				   string file, int line,
 				   string s1, string s2)
@@ -236,7 +236,7 @@ namespace Wv.Test
 		String.Format("[{0}] == [{1}] ({{{2}}} == {{{3}}})",
 			      cond1, cond2, s1, s2));
 	}
-	
+
 	public static bool test_eq(decimal cond1, decimal cond2,
 				   string file, int line,
 				   string s1, string s2)
@@ -245,7 +245,7 @@ namespace Wv.Test
 		String.Format("[{0}] == [{1}] ({{{2}}} == {{{3}}})",
 			      cond1, cond2, s1, s2));
 	}
-	
+
 	public static bool test_eq(string cond1, string cond2,
 				   string file, int line,
 				   string s1, string s2)
@@ -282,7 +282,7 @@ namespace Wv.Test
 		String.Format("[{0}] != [{1}] ({{{2}}} != {{{3}}})",
 			      cond1, cond2, s1, s2));
 	}
-	
+
 	public static bool test_ne(long cond1, long cond2,
 				   string file, int line,
 				   string s1, string s2)
@@ -291,7 +291,7 @@ namespace Wv.Test
 		String.Format("[{0}] != [{1}] ({{{2}}} != {{{3}}})",
 			      cond1, cond2, s1, s2));
 	}
-	
+
 	public static bool test_ne(ulong cond1, ulong cond2,
 				   string file, int line,
 				   string s1, string s2)
@@ -300,7 +300,7 @@ namespace Wv.Test
 		String.Format("[{0}] != [{1}] ({{{2}}} != {{{3}}})",
 			      cond1, cond2, s1, s2));
 	}
-	
+
 	public static bool test_ne(double cond1, double cond2,
 				   string file, int line,
 				   string s1, string s2)
@@ -309,7 +309,7 @@ namespace Wv.Test
 		String.Format("[{0}] != [{1}] ({{{2}}} != {{{3}}})",
 			      cond1, cond2, s1, s2));
 	}
-	
+
 	public static bool test_ne(decimal cond1, decimal cond2,
 				   string file, int line,
 				   string s1, string s2)
@@ -318,7 +318,7 @@ namespace Wv.Test
 		String.Format("[{0}] != [{1}] ({{{2}}} != {{{3}}})",
 			      cond1, cond2, s1, s2));
 	}
-	
+
 	public static bool test_ne(string cond1, string cond2,
 				   string file, int line,
 				   string s1, string s2)
@@ -327,7 +327,7 @@ namespace Wv.Test
 		String.Format("[{0}] != [{1}] ({{{2}}} != {{{3}}})",
 			      cond1, cond2, s1, s2));
 	}
-	
+
 	// See notes for test_eq(IComparable,IComparable)
 	public static bool test_ne(IComparable cond1, IComparable cond2,
 				   string file, int line,
@@ -336,7 +336,7 @@ namespace Wv.Test
 	    return test(cond1.CompareTo(cond2) != 0, file, line,
 			String.Format("[{0}] != [{1}]", s1, s2));
 	}
-	
+
 	public static bool test_ne(object cond1, object cond2,
 				   string file, int line,
 				   string s1, string s2)
