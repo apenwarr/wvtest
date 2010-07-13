@@ -2,4 +2,7 @@ Testing "my error test function" in mytest.t.cc:
 ! mytest.t.cc:432     thing.works()         ok
 This is just some crap that I printed while counting to 3.
 ! mytest.t.cc.433     3 < 4                 FAILED
+! mytest.t.cc.435     3 < 5                 xfail
+! mytest.t.cc.437     3 < 6                 xpass
+! mytest.t.cc.439     3 < 7                 skip
 
