@@ -6,6 +6,9 @@ WVPASS true
 WVPASS true
 WVPASS true
 WVFAIL false
+WVXFAIL false
+WVXFAIL true
+WVSKIP non-existent
 WVPASSEQ "$(ls | sort)" "$(ls)"
 WVPASSNE "5" "5 "
 WVPASSEQ "" ""

@@ -92,6 +92,26 @@ WVFAIL()
 	fi
 }
 
+WVXFAIL()
+{
+	TEXT="$*"
+
+	_wvfind_caller
+	if "$@"; then
+		_wvreport xpass "$TEXT"
+		return 0
+	else
+		_wvreport xfail "$TEXT"
+		return 0
+	fi
+}
+
+WVSKIP()
+{
+	_wvfind_caller
+	_wvreport skip "$*"
+}
+
 
 _wvgetrv()
 {
