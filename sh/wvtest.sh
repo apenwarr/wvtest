@@ -36,6 +36,14 @@ else
 fi
 
 
+# _wvreport <result> <text>
+_wvreport()
+{
+	OK="$1"
+	TEXT=$(_wvtextclean "$2")
+	echo "! $WVCALLER_FILE:$WVCALLER_LINE  $TEXT  $OK" >&2
+}
+
 _wvcheck()
 {
 	CODE="$1"
@@ -44,7 +52,7 @@ _wvcheck()
 	if [ "$CODE" -ne 0 ]; then
 		OK=FAILED
 	fi
-	echo "! $WVCALLER_FILE:$WVCALLER_LINE  $TEXT  $OK" >&2
+	_wvreport "$OK" "$2"
 	if [ "$CODE" -ne 0 ]; then
 		exit $CODE
 	else
