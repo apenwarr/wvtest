@@ -27,7 +27,7 @@ if (!$pid) {
     exit 126; # just in case
 }
 
-my $istty = -t STDOUT;
+my $istty = -t STDOUT && $ENV{'TERM'} ne "dumb";
 my @log = ();
 my ($gpasses, $gfails) = (0,0);
 
