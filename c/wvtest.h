@@ -24,6 +24,7 @@ struct WvTest {
 	struct WvTest *next;
 };
 
+void wvtest_register(struct WvTest *ptr);
 int wvtest_run_all(char * const *prefixes);
 void wvtest_start(const char *file, int line, const char *condstr);
 void wvtest_check(bool cond, const char *reason);
@@ -64,8 +65,9 @@ bool wvtest_start_check_lt_str(const char *file, int line,
 #define WVTEST_MAIN3(_descr, ff, ll, _slowness)				\
 	static void _wvtest_main_##ll();				\
 	struct WvTest _wvtest_##ll = \
-	{ .descr = _descr, .idstr = ff ":" #ll, .main = _wvtest_main_##ll, .slowness = _slowness }, \
-		*_wvtest_ptr_##ll __attribute__ ((section ("wvtest"))) = &_wvtest_##ll; \
+	{ .descr = _descr, .idstr = ff ":" #ll, .main = _wvtest_main_##ll, .slowness = _slowness }; \
+	static void _wvtest_register_##ll() __attribute__ ((constructor)); \
+	static void _wvtest_register_##ll() { wvtest_register(&_wvtest_##ll); } \
 	static void _wvtest_main_##ll()
 #define WVTEST_MAIN2(descr, ff, ll, slowness)	\
 	WVTEST_MAIN3(descr, ff, ll, slowness)

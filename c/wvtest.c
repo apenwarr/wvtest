@@ -124,7 +124,17 @@ static bool prefix_match(const char *s, char * const *prefixes)
     return false;
 }
 
-extern struct WvTest *__start_wvtest, *__stop_wvtest;
+static struct WvTest *wvtest_first, *wvtest_last;
+
+void wvtest_register(struct WvTest *ptr)
+{
+	if (wvtest_first == NULL)
+		wvtest_first = ptr;
+	else
+		wvtest_last->next = ptr;
+	wvtest_last = ptr;
+	wvtest_last->next = NULL;
+}
 
 int wvtest_run_all(char * const *prefixes)
 {
@@ -168,10 +178,10 @@ int wvtest_run_all(char * const *prefixes)
     // there are lots of fflush() calls in here because stupid win32 doesn't
     // flush very often by itself.
     fails = runs = 0;
-    struct WvTest *cur, **p;
-    for (p = &__start_wvtest; p < &__stop_wvtest; p++)
+    struct WvTest *cur;
+
+    for (cur = wvtest_first; cur != NULL; cur = cur->next)
     {
-	cur = *p;
 	if (cur->slowness <= max_slowness
 	    && cur->slowness >= min_slowness
 	    && (!prefixes
