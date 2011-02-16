@@ -382,6 +382,24 @@ bool wvtest_start_check_eq(const char *file, int line,
     return cond;
 }
 
+bool wvtest_start_check_eq_double(const char *file, int line,
+				 double a, double b, double c, bool expect_pass)
+{
+    size_t len = 11 + 11 + 11 + 8 + 1;
+    char *str = malloc(len);
+    sprintf(str, "%f %s %f eps %f", a, expect_pass ? "==" : "!=", b, c);
+
+    wvtest_start(file, line, str);
+    free(str);
+
+    bool cond = ( WVABS(a - b) <= WVABS(c) );
+    if (!expect_pass)
+      cond = !cond;
+
+    wvtest_check(cond, NULL);
+    return cond;
+}
+
 
 bool wvtest_start_check_lt(const char *file, int line,
 			   int a, int b)
