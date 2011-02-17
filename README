@@ -122,7 +122,7 @@ The WvTest Protocol
 -------------------
 
 WvTest is a protocol, not really an API.  As it happens, the
-WvTest project includes several (currently four)
+WvTest project includes several (currently five)
 implementations of APIs that produce data in the WvTest format,
 but it's super easy to add your own.
 
@@ -256,6 +256,7 @@ How do I actually write WvTest tests?
 
 Sample code is provided for these languages:
 
+	C: try typing "cd c; make test"
 	C++: try typing "cd cpp; make test"
 	C# (mono): try typing "cd dotnet; make test"
 	Python: try typing "cd python; make test"
@@ -286,11 +287,11 @@ How do I run just certain tests?
 --------------------------------
 
 Unfortunately, the command-line syntax for running just *some*
-of your tests varies depending which WvTest language you're
-using.  For C++ or C#, you link an executable with wvtestmain.cc
-or wvtestmain.cs, respectively, and then you can provide strings
-on the command line.  Test functions will run only if they have
-names that start with one of the provided strings:
+of your tests varies depending which WvTest language you're using.
+For C, C++ or C#, you link an executable with wvtestmain.c or
+wvtestmain.cc or wvtestmain.cs, respectively, and then you can
+provide strings on the command line.  Test functions will run only
+if they have names that start with one of the provided strings:
 
 	cd cpp/t
 	../../wvtestrun ./wvtest myfunc otherfunc
