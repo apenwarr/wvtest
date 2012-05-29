@@ -1,8 +1,9 @@
 /* -*- Mode: C++ -*-
  * WvTest:
- *   Copyright (C) 1997-2009 Net Integration Technologies, Inc.
+ *   Copyright (C)1997-2012 Net Integration Technologies and contributors.
  *       Licensed under the GNU Library General Public License, version 2.
  *       See the included file named LICENSE for license information.
+ *       You can get wvtest from: http://github.com/apenwarr/wvtest
  */
 #ifndef __WVTEST_H
 #define __WVTEST_H
