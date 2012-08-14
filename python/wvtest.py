@@ -137,7 +137,7 @@ def _run_in_chdir(path, func, *args, **kwargs):
     oldwd = os.getcwd()
     oldpath = sys.path
     try:
-        os.chdir(path)
+        if path: os.chdir(path)
         sys.path += [path, os.path.split(path)[0]]
         return func(*args, **kwargs)
     finally:
@@ -146,6 +146,7 @@ def _run_in_chdir(path, func, *args, **kwargs):
 
 
 def _runtest(fname, f):
+    import wvtest as _wvtestmod
     mod = inspect.getmodule(f)
     relpath = os.path.relpath(mod.__file__, os.getcwd()).replace('.pyc', '.py')
     print
@@ -157,7 +158,7 @@ def _runtest(fname, f):
         print
         print traceback.format_exc()
         tb = sys.exc_info()[2]
-        wvtest._result(e, traceback.extract_tb(tb)[1], 'EXCEPTION')
+        _wvtestmod._result(e, traceback.extract_tb(tb)[1], 'EXCEPTION')
 
 
 def _run_registered_tests():

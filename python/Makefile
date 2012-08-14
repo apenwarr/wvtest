@@ -5,8 +5,10 @@ all:
 
 runtests:
 	./wvtest.py \
-		$(patsubst ./%t,%t/*.py,$(shell find -type d -name t))
+		$(patsubst ./%t,%t/*.py,$(shell find -type d -name t)) \
+		basedir_test.py
 	python t/twvtest.py
+	python basedir_test.py
 
 test:
 	../wvtestrun $(MAKE) runtests
