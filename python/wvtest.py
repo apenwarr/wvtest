@@ -158,7 +158,7 @@ def _runtest(fname, f):
         print
         print traceback.format_exc()
         tb = sys.exc_info()[2]
-        _wvtestmod._result(e, traceback.extract_tb(tb)[1], 'EXCEPTION')
+        _wvtestmod._result(e, traceback.extract_tb(tb)[2], 'EXCEPTION')
 
 
 def _run_registered_tests():
