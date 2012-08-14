@@ -1,9 +1,17 @@
+import __init__
 from wvtest import *
+import twvtest2  # twvtest2 will also run *before* us since we import it
 
 last=None
 
 def _except(*args):
     raise Exception(*args)
+
+
+@wvtest
+def moretest():
+    WVPASSEQ(twvtest2.count, 1)
+
 
 @wvtest
 def test1():
@@ -36,3 +44,11 @@ def booga1():
 @wvtest
 def chdir_test():
     WVPASS(open('testfile.txt')) # will fail if chdir is wrong
+
+
+if __name__ == '__main__':
+    WVPASSEQ(twvtest2.count, 0)
+    wvtest_main()
+    wvtest_main()
+    WVPASSEQ(last, 'booga1')
+    WVPASSEQ(twvtest2.count, 1)
