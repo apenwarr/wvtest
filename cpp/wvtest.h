@@ -31,6 +31,8 @@ class WvTest
 
     static void print_result(bool start, const char *file, int line,
             const char *condstr, const char *result);
+
+    static void check_prologue();
 public:
     WvTest(const char *_descr, const char *_idstr, MainFunc *_main, int _slow);
     static int run_all(const char * const *prefixes = NULL);
