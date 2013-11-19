@@ -276,7 +276,7 @@ int WvTest::run_all(const char * const *prefixes)
 //
 // Yes, this is probably the worst API of all time.
 void WvTest::print_result(bool start, const char *_file, int _line,
-        const char *_condstr, bool result)
+        const char *_condstr, const char *result)
 {
     static char *file;
     static char *condstr;
@@ -299,18 +299,17 @@ void WvTest::print_result(bool start, const char *_file, int _line,
         }
     }
 
-    const char *result_str = result ? "ok\n" : "FAILED\n";
     if (run_twice)
     {
         if (!start)
-            printf(TEST_START_FORMAT "%s", file, line, condstr, result_str);
+            printf(TEST_START_FORMAT "%s\n", file, line, condstr, result);
     }
     else
     {
         if (start)
             printf(TEST_START_FORMAT, file, line, condstr);
         else
-            printf("%s", result_str);
+            printf("%s\n", result);
     }
     fflush(stdout);
 
@@ -328,7 +327,7 @@ void WvTest::print_result(bool start, const char *_file, int _line,
 void WvTest::start(const char *file, int line, const char *condstr)
 {
     // Either print the file, line, and condstr, or save them for later.
-    print_result(true, file, line, condstr, 0);
+    print_result(true, file, line, condstr, NULL);
 }
 
 
@@ -349,7 +348,7 @@ void WvTest::check(bool cond)
 
     runs++;
 
-    print_result(false, NULL, 0, NULL, cond);
+    print_result(false, NULL, 0, NULL, cond ? "ok" : "FAILED");
 
     if (!cond)
     {
