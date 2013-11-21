@@ -336,7 +336,7 @@ void wvtest_start(const char *file, int line, const char *condstr)
 }
 
 
-void wvtest_check(bool cond, const char *reason)
+static void wvtest_check_prologue()
 {
 #ifndef _WIN32
     alarm(MAX_TEST_TIME); // restart per-test timeout
@@ -352,7 +352,12 @@ void wvtest_check(bool cond, const char *reason)
     }
 
     runs++;
+}
 
+
+void wvtest_check(bool cond, const char *reason)
+{
+    wvtest_check_prologue();
     print_result_str(false, NULL, 0, NULL, cond ? "ok" : (reason ? reason : "FAILED"));
 
     if (!cond)
