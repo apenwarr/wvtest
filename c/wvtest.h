@@ -63,6 +63,15 @@ bool wvtest_start_check_lt_str(const char *file, int line,
 #define WVFAILNE(a, b) WVPASSEQ(a, b)
 #define WVFAILNESTR(a, b) WVPASSEQSTR(a, b)
 
+#define WVXFAIL(cond) do { \
+    wvtest_start(__FILE__, __LINE__, #cond); \
+    wvtest_check_xfail(cond); \
+} while (0)
+
+#define WVSKIP(cond) \
+    wvtest_skip(__FILE__, __LINE__, #cond)
+
+
 #define WVTEST_MAIN3(_descr, ff, ll, _slowness)				\
 	static void _wvtest_main_##ll();				\
 	struct WvTest _wvtest_##ll = \

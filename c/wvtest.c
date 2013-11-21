@@ -35,7 +35,7 @@
 
 #define TEST_START_FORMAT "! %s:%-5d %-40s "
 
-static int fails, runs;
+static int fails, runs, xpasses, xfails, skips;
 static time_t start_time;
 static bool run_twice;
 
@@ -178,7 +178,7 @@ int wvtest_run_all(char * const *prefixes)
 
     // there are lots of fflush() calls in here because stupid win32 doesn't
     // flush very often by itself.
-    fails = runs = 0;
+    fails = runs = xpasses = xfails = skips = 0;
     struct WvTest *cur;
 
     for (cur = wvtest_first; cur != NULL; cur = cur->next)
@@ -256,6 +256,10 @@ int wvtest_run_all(char * const *prefixes)
     printf("WvTest: %d test%s, %d failure%s.\n",
 	   runs, runs==1 ? "" : "s",
 	   fails, fails==1 ? "": "s");
+    printf("WvTest: %d test%s skipped, %d known breakage%s, %d fixed breakage%s.\n",
+	   skips, skips==1 ? "" : "s",
+	   xfails, xfails==1 ? "" : "s",
+	   xpasses, xpasses==1 ? "" : "s");
     fflush(stdout);
 
     return fails != 0;
@@ -336,7 +340,7 @@ void wvtest_start(const char *file, int line, const char *condstr)
 }
 
 
-static void wvtest_check_prologue()
+static void check_prologue()
 {
 #ifndef _WIN32
     alarm(MAX_TEST_TIME); // restart per-test timeout
@@ -357,7 +361,7 @@ static void wvtest_check_prologue()
 
 void wvtest_check(bool cond, const char *reason)
 {
-    wvtest_check_prologue();
+    check_prologue();
     print_result_str(false, NULL, 0, NULL, cond ? "ok" : (reason ? reason : "FAILED"));
 
     if (!cond)
@@ -367,6 +371,26 @@ void wvtest_check(bool cond, const char *reason)
 	if (getenv("WVTEST_DIE_FAST"))
 	    abort();
     }
+}
+
+
+void wvtest_check_xfail(bool cond)
+{
+    check_prologue();
+    print_result_str(false, NULL, 0, NULL, cond ? "xpass" : "xfail");
+
+    if (cond)
+        xpasses++;
+    else
+        xfails++;
+}
+
+
+void wvtest_skip(const char *file, int line, const char *condstr)
+{
+    wvtest_start(file, line, condstr);
+    print_result_str(false, NULL, 0, NULL, "skip");
+    skips++;
 }
 
 
