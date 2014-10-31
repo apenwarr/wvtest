@@ -34,13 +34,13 @@ if __name__ != '__main__':   # we're imported as a module
     _tests = 0
     _fails = 0
 
-    def wvtest(func):
+    def wvtest(func, innerfunc=None):
         """ Use this decorator (@wvtest) in front of any function you want to
             run as part of the unit test suite.  Then run:
                 python wvtest.py path/to/yourtest.py [other test.py files...]
             to run all the @wvtest functions in the given file(s).
         """
-        _registered.append(func)
+        _registered.append((func, innerfunc or func))
         return func
 
 
@@ -58,8 +58,8 @@ if __name__ != '__main__':   # we're imported as a module
         sys.stdout.flush()
 
 
-    def _check(cond, msg = 'unknown', tb = None):
-        if tb == None: tb = traceback.extract_stack()[-3]
+    def _check(cond, msg, xdepth):
+        tb = traceback.extract_stack()[-3 - xdepth]
         if cond:
             _result(msg, tb, 'ok')
         else:
@@ -67,65 +67,120 @@ if __name__ != '__main__':   # we're imported as a module
         return cond
 
 
-    def _code():
-        (filename, line, func, text) = traceback.extract_stack()[-3]
-        text = re.sub(r'^\w+\((.*)\)(\s*#.*)?$', r'\1', text);
+    def _code(xdepth):
+        (filename, line, func, text) = traceback.extract_stack()[-3 - xdepth]
+        text = re.sub(r'^[\w\.]+\((.*)\)(\s*#.*)?$', r'\1', text);
         return text
 
 
-    def WVPASS(cond = True):
+    def WVPASS(cond = True, xdepth = 0):
         ''' Counts a test failure unless cond is true. '''
-        return _check(cond, _code())
+        return _check(cond, _code(xdepth), xdepth)
 
-    def WVFAIL(cond = True):
+    def WVFAIL(cond = True, xdepth = 0):
         ''' Counts a test failure  unless cond is false. '''
-        return _check(not cond, 'NOT(%s)' % _code())
+        return _check(not cond, 'NOT(%s)' % _code(xdepth), xdepth)
 
-    def WVPASSEQ(a, b):
+    def WVPASSIS(a, b, xdepth = 0):
+        ''' Counts a test failure unless a is b. '''
+        return _check(a is b, '%s is %s' % (repr(a), repr(b)), xdepth)
+
+    def WVPASSISNOT(a, b, xdepth = 0):
+        ''' Counts a test failure unless a is not b. '''
+        return _check(a is not b, '%s is not %s' % (repr(a), repr(b)), xdepth)
+
+    def WVPASSEQ(a, b, xdepth = 0):
         ''' Counts a test failure unless a == b. '''
-        return _check(a == b, '%s == %s' % (repr(a), repr(b)))
+        return _check(a == b, '%s == %s' % (repr(a), repr(b)), xdepth)
 
-    def WVPASSNE(a, b):
+    def WVPASSNE(a, b, xdepth = 0):
         ''' Counts a test failure unless a != b. '''
-        return _check(a != b, '%s != %s' % (repr(a), repr(b)))
+        return _check(a != b, '%s != %s' % (repr(a), repr(b)), xdepth)
 
-    def WVPASSLT(a, b):
+    def WVPASSLT(a, b, xdepth = 0):
         ''' Counts a test failure unless a < b. '''
-        return _check(a < b, '%s < %s' % (repr(a), repr(b)))
+        return _check(a < b, '%s < %s' % (repr(a), repr(b)), xdepth)
 
-    def WVPASSLE(a, b):
+    def WVPASSLE(a, b, xdepth = 0):
         ''' Counts a test failure unless a <= b. '''
-        return _check(a <= b, '%s <= %s' % (repr(a), repr(b)))
+        return _check(a <= b, '%s <= %s' % (repr(a), repr(b)), xdepth)
 
-    def WVPASSGT(a, b):
+    def WVPASSGT(a, b, xdepth = 0):
         ''' Counts a test failure unless a > b. '''
-        return _check(a > b, '%s > %s' % (repr(a), repr(b)))
+        return _check(a > b, '%s > %s' % (repr(a), repr(b)), xdepth)
 
-    def WVPASSGE(a, b):
+    def WVPASSGE(a, b, xdepth = 0):
         ''' Counts a test failure unless a >= b. '''
-        return _check(a >= b, '%s >= %s' % (repr(a), repr(b)))
+        return _check(a >= b, '%s >= %s' % (repr(a), repr(b)), xdepth)
 
-    def WVEXCEPT(etype, func, *args, **kwargs):
+    def WVPASSNEAR(a, b, places = 7, delta = None, xdepth = 0):
+        ''' Counts a test failure unless a ~= b. '''
+        if delta:
+            return _check(abs(a - b) <= abs(delta),
+                          '%s ~= %s' % (repr(a), repr(b)), xdepth)
+        else:
+            return _check(round(a, places) == round(b, places),
+                          '%s ~= %s' % (repr(a), repr(b)), xdepth)
+
+    def WVPASSFAR(a, b, places = 7, delta = None, xdepth = 0):
+        ''' Counts a test failure unless a ~!= b. '''
+        if delta:
+            return _check(abs(a - b) > abs(delta),
+                          '%s ~= %s' % (repr(a), repr(b)), xdepth)
+        else:
+            return _check(round(a, places) != round(b, places),
+                          '%s ~= %s' % (repr(a), repr(b)), xdepth)
+
+    def _except_report(cond, code, xdepth):
+        return _check(cond, 'EXCEPT(%s)' % code, xdepth + 1)
+
+    class _ExceptWrapper(object):
+        def __init__(self, etype, xdepth):
+            self.etype = etype
+            self.xdepth = xdepth
+            self.code = None
+
+        def __enter__(self):
+          self.code = _code(self.xdepth)
+
+        def __exit__(self, etype, value, traceback):
+            if etype == self.etype:
+                _except_report(True, self.code, self.xdepth)
+                return 1  # success, got the expected exception
+            elif etype is None:
+                _except_report(False, self.code, self.xdepth)
+                return 0
+            else:
+                _except_report(False, self.code, self.xdepth)
+
+    def _WVEXCEPT(etype, xdepth, func, *args, **kwargs):
+        if func:
+            code = _code(xdepth + 1)
+            try:
+                func(*args, **kwargs)
+            except etype, e:
+                return _except_report(True, code, xdepth + 1)
+            except:
+                _except_report(False, code, xdepth + 1)
+                raise
+            else:
+                return _except_report(False, code, xdepth + 1)
+        else:
+            return _ExceptWrapper(etype, xdepth)
+
+    def WVEXCEPT(etype, func=None, *args, **kwargs):
         ''' Counts a test failure unless func throws an 'etype' exception.
             You have to spell out the function name and arguments, rather than
             calling the function yourself, so that WVEXCEPT can run before
             your test code throws an exception.
         '''
-        try:
-            func(*args, **kwargs)
-        except etype, e:
-            return _check(True, 'EXCEPT(%s)' % _code())
-        except:
-            _check(False, 'EXCEPT(%s)' % _code())
-            raise
-        else:
-            return _check(False, 'EXCEPT(%s)' % _code())
+        return _WVEXCEPT(etype, 0, func, *args, **kwargs)
 
 
     def _check_unfinished():
         if _registered:
-            for func in _registered:
-                print 'WARNING: not run: %r' % (func,)
+            for func, innerfunc in _registered:
+                print 'WARNING: not run: %r' % (innerfunc,)
             WVFAIL('wvtest_main() not called')
         if _fails:
             sys.exit(1)
@@ -145,9 +200,9 @@ def _run_in_chdir(path, func, *args, **kwargs):
         sys.path = oldpath
 
 
-def _runtest(fname, f):
+def _runtest(fname, f, innerfunc):
     import wvtest as _wvtestmod
-    mod = inspect.getmodule(f)
+    mod = inspect.getmodule(innerfunc)
     relpath = os.path.relpath(mod.__file__, os.getcwd()).replace('.pyc', '.py')
     print
     print 'Testing "%s" in %s:' % (fname, relpath)
@@ -158,14 +213,14 @@ def _runtest(fname, f):
         print
         print traceback.format_exc()
         tb = sys.exc_info()[2]
-        _wvtestmod._result(e, traceback.extract_tb(tb)[2], 'EXCEPTION')
+        _wvtestmod._result(repr(e), traceback.extract_tb(tb)[-1], 'EXCEPTION')
 
 
 def _run_registered_tests():
     import wvtest as _wvtestmod
     while _wvtestmod._registered:
-        t = _wvtestmod._registered.pop(0)
-        _runtest(t.func_name, t)
+        func, innerfunc = _wvtestmod._registered.pop(0)
+        _runtest(innerfunc.func_name, func, innerfunc)
         print
 
 

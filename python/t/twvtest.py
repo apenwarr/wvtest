@@ -5,7 +5,7 @@ import twvtest2  # twvtest2 will also run *before* us since we import it
 last=None
 
 def _except(*args):
-    raise Exception(*args)
+    raise IOError(*args)
 
 
 @wvtest
@@ -15,11 +15,28 @@ def moretest():
 
 @wvtest
 def test1():
+    WVPASSIS(None, None)
+    WVPASSISNOT(None, [])
+    WVPASSISNOT({}, {})
+    d = {}
+    WVPASSIS(d, d)
+    WVPASSEQ(1, 1)
+    WVPASSNE(1, 2)
     WVPASSLT(1, 2)
     WVPASSLE(1, 1)
     WVPASSGT(2, 1)
     WVPASSGE(2, 2)
-    WVEXCEPT(Exception, _except, 'my exception parameter')
+    WVPASSNEAR(1, 1)
+    WVPASSFAR(1, 0)
+    WVPASSNEAR(1, 1.0)
+    WVPASSFAR(0.1, 0.2)
+    WVPASSNEAR(0.000000005, 0.000000006)
+    WVPASSFAR(0.000000005, 0.000000006, places=9)
+    WVPASSNEAR(0.51, 0.53, delta=0.021)
+    WVPASSFAR(0.51, 0.53, delta=0.019)
+    WVEXCEPT(IOError, _except, 'my exception parameter')
+    with WVEXCEPT(IOError):
+      _except('arg')
 
     # ensure tests run in the order they were declared
     global last
