@@ -1,3 +1,5 @@
+import sys
+import traceback
 import wvtest
 
 
@@ -15,6 +17,12 @@ class _Meta(type):
             o.setUp()
             try:
               getattr(o, t)()
+            except Exception, e:
+              print
+              print traceback.format_exc()
+              tb = sys.exc_info()[2]
+              wvtest._result(repr(e), traceback.extract_tb(tb)[-1],
+                             'EXCEPTION')
             finally:
               o.tearDown()
           return Go

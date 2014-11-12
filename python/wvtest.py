@@ -69,7 +69,7 @@ if __name__ != '__main__':   # we're imported as a module
 
     def _code(xdepth):
         (filename, line, func, text) = traceback.extract_stack()[-3 - xdepth]
-        text = re.sub(r'^[\w\.]+\((.*)\)(\s*#.*)?$', r'\1', text);
+        text = re.sub(r'^[\w\.]+\((.*)\)(\s*#.*)?$', r'\1', str(text));
         return text
 
 
