@@ -14,6 +14,7 @@ runtests: build
 	$(MAKE) -C dotnet runtests
 	$(MAKE) -C cpp runtests
 	$(MAKE) -C c runtests
+	$(MAKE) -C javascript runtests
 
 
 test: build
