@@ -27,25 +27,19 @@
 
 #include <v8.h>
 #include <assert.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <string.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #ifdef COMPRESS_STARTUP_DATA_BZ2
 #error Using compressed startup data is not supported for this sample
 #endif
 
-/**
- * This sample program shows how to implement a simple javascript shell
- * based on V8.  This includes initializing V8 with command line options,
- * creating global functions, compiling and executing strings.
- *
- * For a more sophisticated shell, consider using the debug shell D8.
- */
 
-
-v8::Persistent<v8::Context> CreateShellContext();
 void RunShell(v8::Handle<v8::Context> context);
 int RunMain(int argc, char* argv[]);
 bool ExecuteString(v8::Handle<v8::String> source,
@@ -57,7 +51,7 @@ v8::Handle<v8::Value> Read(const v8::Arguments& args);
 v8::Handle<v8::Value> Load(const v8::Arguments& args);
 v8::Handle<v8::Value> Quit(const v8::Arguments& args);
 v8::Handle<v8::Value> Version(const v8::Arguments& args);
-v8::Handle<v8::String> ReadFile(const char* name);
+v8::Handle<v8::Value> ReadFile(const char* name);
 void ReportException(v8::TryCatch* handler);
 
 
@@ -70,16 +64,21 @@ int main(int argc, char* argv[]) {
   run_shell = (argc == 1);
   {
     v8::HandleScope handle_scope;
-    v8::Persistent<v8::Context> context = CreateShellContext();
+
+    v8::Handle<v8::ObjectTemplate> global = v8::ObjectTemplate::New();
+    global->Set(v8::String::New("print"), v8::FunctionTemplate::New(Print));
+    global->Set(v8::String::New("read"), v8::FunctionTemplate::New(Read));
+    global->Set(v8::String::New("load"), v8::FunctionTemplate::New(Load));
+    global->Set(v8::String::New("quit"), v8::FunctionTemplate::New(Quit));
+    global->Set(v8::String::New("version"), v8::FunctionTemplate::New(Version));
+    v8::Handle<v8::Context> context = v8::Context::New(NULL, global);
     if (context.IsEmpty()) {
-      printf("Error creating context\n");
+      fprintf(stderr, "Error creating context\n");
       return 1;
     }
-    context->Enter();
+    v8::Context::Scope context_scope(context);
     result = RunMain(argc, argv);
     if (run_shell) RunShell(context);
-    context->Exit();
-    context.Dispose();
   }
   v8::V8::Dispose();
   return result;
@@ -92,23 +91,17 @@ const char* ToCString(const v8::String::Utf8Value& value) {
 }
 
 
-// Creates a new execution environment containing the built-in
-// functions.
-v8::Persistent<v8::Context> CreateShellContext() {
-  // Create a template for the global object.
-  v8::Handle<v8::ObjectTemplate> global = v8::ObjectTemplate::New();
-  // Bind the global 'print' function to the C++ Print callback.
-  global->Set(v8::String::New("print"), v8::FunctionTemplate::New(Print));
-  // Bind the global 'read' function to the C++ Read callback.
-  global->Set(v8::String::New("read"), v8::FunctionTemplate::New(Read));
-  // Bind the global 'load' function to the C++ Load callback.
-  global->Set(v8::String::New("load"), v8::FunctionTemplate::New(Load));
-  // Bind the 'quit' function
-  global->Set(v8::String::New("quit"), v8::FunctionTemplate::New(Quit));
-  // Bind the 'version' function
-  global->Set(v8::String::New("version"), v8::FunctionTemplate::New(Version));
+// Returns an exception object corresponding to the given string.
+v8::Handle<v8::Value> StringException(const char *s) {
+  return v8::ThrowException(v8::Exception::Error(v8::String::New(s)));
+}
 
-  return v8::Context::New(NULL, global);
+
+// Returns an exception object corresponding to the Unix errno.
+v8::Handle<v8::Value> ErrnoException(const char *prefix, int errnum) {
+  char errbuf[128];
+  snprintf(errbuf, sizeof(errbuf), "%s: %s", prefix, strerror(errnum));
+  return StringException(errbuf);
 }
 
 
@@ -125,8 +118,7 @@ v8::Handle<v8::Value> Print(const v8::Arguments& args) {
       printf(" ");
     }
     v8::String::Utf8Value str(args[i]);
-    const char* cstr = ToCString(str);
-    printf("%s", cstr);
+    printf("%s", ToCString(str));
   }
   printf("\n");
   fflush(stdout);
@@ -139,15 +131,15 @@ v8::Handle<v8::Value> Print(const v8::Arguments& args) {
 // the argument into a JavaScript string.
 v8::Handle<v8::Value> Read(const v8::Arguments& args) {
   if (args.Length() != 1) {
-    return v8::ThrowException(v8::String::New("Bad parameters"));
+    return StringException("Usage: read(filename)");
   }
   v8::String::Utf8Value file(args[0]);
   if (*file == NULL) {
-    return v8::ThrowException(v8::String::New("Error loading file"));
+    return StringException("read(): Missing filename");
   }
-  v8::Handle<v8::String> source = ReadFile(*file);
-  if (source.IsEmpty()) {
-    return v8::ThrowException(v8::String::New("Error loading file"));
+  v8::Handle<v8::Value> source = ReadFile(*file);
+  if (source.IsEmpty() || !source->IsString()) {
+    return StringException("read(): Error loading file");
   }
   return source;
 }
@@ -159,16 +151,17 @@ v8::Handle<v8::Value> Read(const v8::Arguments& args) {
 v8::Handle<v8::Value> Load(const v8::Arguments& args) {
   for (int i = 0; i < args.Length(); i++) {
     v8::HandleScope handle_scope;
-    v8::String::Utf8Value file(args[i]);
-    if (*file == NULL) {
-      return v8::ThrowException(v8::String::New("Error loading file"));
+    v8::String::Utf8Value filename(args[i]);
+    if (*filename == NULL) {
+      return StringException("load(): Missing filename");
     }
-    v8::Handle<v8::String> source = ReadFile(*file);
-    if (source.IsEmpty()) {
-      return v8::ThrowException(v8::String::New("Error loading file"));
+    v8::Handle<v8::String> source = v8::Handle<v8::String>::Cast(
+        ReadFile(*filename));
+    if (source.IsEmpty() || !source->IsString()) {
+      return StringException("load(): Error loading file");
     }
-    if (!ExecuteString(source, v8::String::New(*file), false, false)) {
-      return v8::ThrowException(v8::String::New("Error executing file"));
+    if (!ExecuteString(source, v8::String::New(*filename), false, false)) {
+      return StringException("load(): Error executing file");
     }
   }
   return v8::Undefined();
@@ -194,21 +187,37 @@ v8::Handle<v8::Value> Version(const v8::Arguments& args) {
 
 
 // Reads a file into a v8 string.
-v8::Handle<v8::String> ReadFile(const char* name) {
-  FILE* file = fopen(name, "rb");
-  if (file == NULL) return v8::Handle<v8::String>();
+v8::Handle<v8::Value> ReadFile(const char* name) {
+  int fd = open(name, O_RDONLY);
+  if (fd < 0) return ErrnoException(name, errno);
 
-  fseek(file, 0, SEEK_END);
-  int size = ftell(file);
-  rewind(file);
+  struct stat st;
+  if (fstat(fd, &st) < 0) return ErrnoException("fstat", errno);
+  if (!S_ISREG(st.st_mode)) {
+    return ErrnoException("not a regular file", EINVAL);
+  }
+
+  errno = 0;
+  off_t size = lseek(fd, 0, SEEK_END);
+  if (errno) return ErrnoException("lseek(end)", errno);
+  lseek(fd, 0, SEEK_SET);
+  if (errno) return ErrnoException("lseek(0)", errno);
 
   char* chars = new char[size + 1];
-  chars[size] = '\0';
-  for (int i = 0; i < size;) {
-    int read = fread(&chars[i], 1, size - i, file);
-    i += read;
+  int nread = 0;
+  while (nread < size) {
+    int got = read(fd, &chars[nread], size - nread);
+    if (got < 0) {
+      int errnum = errno;
+      delete[] chars;
+      return ErrnoException("read", errnum);
+    } else if (!got) {
+      break;
+    }
+    nread += got;
   }
-  fclose(file);
+  chars[nread] = 0;
+  close(fd);
   v8::Handle<v8::String> result = v8::String::New(chars, size);
   delete[] chars;
   return result;
@@ -226,7 +235,7 @@ int RunMain(int argc, char* argv[]) {
       // alone JavaScript engines.
       continue;
     } else if (strncmp(str, "--", 2) == 0) {
-      printf("Warning: unknown flag %s.\nTry --help for options\n", str);
+      fprintf(stderr, "Warning: unknown flag %s.\nTry --help for options\n", str);
     } else if (strcmp(str, "-e") == 0 && i + 1 < argc) {
       // Execute argument given to -e option directly.
       v8::Handle<v8::String> file_name = v8::String::New("unnamed");
@@ -235,9 +244,10 @@ int RunMain(int argc, char* argv[]) {
     } else {
       // Use all other arguments as names of files to load and run.
       v8::Handle<v8::String> file_name = v8::String::New(str);
-      v8::Handle<v8::String> source = ReadFile(str);
-      if (source.IsEmpty()) {
-        printf("Error reading '%s'\n", str);
+      v8::Handle<v8::String> source = v8::Handle<v8::String>::Cast(
+          ReadFile(str));
+      if (source.IsEmpty() || !source->IsString()) {
+        fprintf(stderr, "Error reading '%s'\n", str);
         continue;
       }
       if (!ExecuteString(source, file_name, false, true)) return 1;
@@ -249,14 +259,14 @@ int RunMain(int argc, char* argv[]) {
 
 // The read-eval-execute loop of the shell.
 void RunShell(v8::Handle<v8::Context> context) {
-  printf("V8 version %s [sample shell]\n", v8::V8::GetVersion());
+  fprintf(stderr, "V8 version %s [sample shell]\n", v8::V8::GetVersion());
   static const int kBufferSize = 256;
   // Enter the execution environment before evaluating any code.
   v8::Context::Scope context_scope(context);
   v8::Local<v8::String> name(v8::String::New("(shell)"));
   while (true) {
     char buffer[kBufferSize];
-    printf("> ");
+    fprintf(stderr, "> ");
     char* str = fgets(buffer, kBufferSize, stdin);
     if (str == NULL) break;
     v8::HandleScope handle_scope;
@@ -293,8 +303,7 @@ bool ExecuteString(v8::Handle<v8::String> source,
         // If all went well and the result wasn't undefined then print
         // the returned value.
         v8::String::Utf8Value str(result);
-        const char* cstr = ToCString(str);
-        printf("%s\n", cstr);
+        printf("%s\n", ToCString(str));
       }
       return true;
     }
@@ -310,31 +319,31 @@ void ReportException(v8::TryCatch* try_catch) {
   if (message.IsEmpty()) {
     // V8 didn't provide any extra information about this error; just
     // print the exception.
-    printf("%s\n", exception_string);
+    fprintf(stderr, "%s\n", exception_string);
   } else {
     // Print (filename):(line number): (message).
     v8::String::Utf8Value filename(message->GetScriptResourceName());
     const char* filename_string = ToCString(filename);
     int linenum = message->GetLineNumber();
-    printf("%s:%i: %s\n", filename_string, linenum, exception_string);
+    fprintf(stderr, "%s:%i: %s\n", filename_string, linenum, exception_string);
     // Print line of source code.
     v8::String::Utf8Value sourceline(message->GetSourceLine());
     const char* sourceline_string = ToCString(sourceline);
-    printf("%s\n", sourceline_string);
+    fprintf(stderr, "%s\n", sourceline_string);
     // Print wavy underline (GetUnderline is deprecated).
     int start = message->GetStartColumn();
     for (int i = 0; i < start; i++) {
-      printf(" ");
+      fprintf(stderr, " ");
     }
     int end = message->GetEndColumn();
     for (int i = start; i < end; i++) {
-      printf("^");
+      fprintf(stderr, "^");
     }
-    printf("\n");
+    fprintf(stderr, "\n");
     v8::String::Utf8Value stack_trace(try_catch->StackTrace());
     if (stack_trace.length() > 0) {
       const char* stack_trace_string = ToCString(stack_trace);
-      printf("%s\n", stack_trace_string);
+      fprintf(stderr, "%s\n", stack_trace_string);
     }
   }
 }
