@@ -29,8 +29,11 @@ if (!$pid) {
 }
 
 my $istty = -t STDOUT && $ENV{'TERM'} ne "dumb";
+my $columns = `tput cols` if ($istty);
+
 my @log = ();
 my ($gpasses, $gfails) = (0,0);
+my $column = 0;
 
 sub bigkill($)
 {
@@ -64,14 +67,17 @@ local $SIG{ALRM} = sub {
     bigkill($pid);
 };
 
-sub colourize($)
+sub colourize($$)
 {
-    my $result = shift;
+    my ($column, $result) = @_;
     my $pass = ($result eq "ok");
 
     if ($istty) {
+	my $dots = $columns - 15 - $column%$columns;
+	$dots += $columns if ($dots < 0);
+	my $leader = "."x$dots;
 	my $colour = $pass ? "\e[32;1m" : "\e[31;1m";
-	return "$colour$result\e[0m";
+	return "$colour$leader $result\e[0m";
     } else {
 	return $result;
     }
@@ -84,18 +90,18 @@ sub mstime($$$)
     my $str = sprintf("%d.%03ds", $ms/1000, $ms % 1000);
 
     if ($istty && $ms > $badtime) {
-        return "\e[31;1m$str\e[0m";
+        return ("\e[31;1m$str\e[0m", length($str));
     } elsif ($istty && $ms > $warntime) {
-        return "\e[33;1m$str\e[0m";
+        return ("\e[33;1m$str\e[0m", length($str));
     } else {
-        return "$str";
+        return ("$str", length($str));
     }
 }
 
 sub resultline($$)
 {
     my ($name, $result) = @_;
-    return sprintf("! %-65s %s", $name, colourize($result));
+    return sprintf("! %s %s", $name, colourize(2+length($name)+1, $result));
 }
 
 my $allstart = time();
@@ -105,7 +111,8 @@ sub endsect()
 {
     $stop = time();
     if ($start) {
-	printf " %s %s\n", mstime($stop - $start, 500, 1000), colourize("ok");
+	my ($time, $timelength) = mstime($stop - $start, 500, 1000);
+	printf " %s %s\n", $time, colourize($column + 2 + $timelength, "ok");
     }
 }
 
@@ -121,7 +128,9 @@ while (<$fh>)
 
 	endsect();
 
-	printf("! %s  %s: ", $file, $sect);
+	my $msg = sprintf("! %s  %s: ", $file, $sect);
+	print $msg;
+	$column = length($msg);
 	@log = ();
 	$start = $stop;
     }
@@ -134,6 +143,7 @@ while (<$fh>)
 
 	if (!$start) {
 	    printf("\n! Startup: ");
+	    $column = 11;
 	    $start = time();
 	}
 
@@ -143,11 +153,13 @@ while (<$fh>)
 	    $gfails++;
 	    if (@log) {
 		print "\n" . join("\n", @log) . "\n";
+		$column = 0;
 		@log = ();
 	    }
 	} else {
 	    $gpasses++;
 	    print ".";
+	    $column++;
 	}
     }
     else
