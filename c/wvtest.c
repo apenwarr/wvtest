@@ -208,7 +208,9 @@ int wvtest_run_all(char * const *prefixes)
 	    fflush(stdout);
 
 	    cur->main();
-	    chdir(wd);
+	    if (chdir(wd)) {
+		perror("Unable to change back to original directory");
+	    }
 
 	    new_valgrind_errs = memerrs();
 	    WVPASS(new_valgrind_errs == old_valgrind_errs);

@@ -87,7 +87,9 @@ int main(int argc, char **argv)
 	if (startfd != endfd)
 	{
 	    sprintf(buf, "ls -l /proc/%d/fd", getpid());
-	    system(buf);
+	    if (system(buf) == -1) {
+		fprintf(stderr, "Unable to list open fds\n");
+	    }
 	}
 #endif
     }
