@@ -32,6 +32,8 @@ void wvtest_check(bool cond, const char *reason);
 static inline bool wvtest_start_check(const char *file, int line,
 				      const char *condstr, bool cond)
 { wvtest_start(file, line, condstr); wvtest_check(cond, NULL); return cond; }
+void wvtest_check_xfail(bool cond);
+void wvtest_skip(const char *file, int line, const char *condstr);
 bool wvtest_start_check_eq(const char *file, int line,
 			   int a, int b, bool expect_pass);
 bool wvtest_start_check_lt(const char *file, int line,
