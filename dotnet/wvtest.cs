@@ -61,6 +61,9 @@ namespace Wv.Test
         List<TestInfo> tests = new List<TestInfo>();
 
         public int failures { get; private set; }
+	public static int xpasses { get; private set; }
+	public static int xfails { get; private set; }
+	public static int skips { get; private set; }
 
 	public WvTest()
 	{
@@ -134,6 +137,9 @@ namespace Wv.Test
             }
 
 	    Console.Out.WriteLine("Result: {0} failures.", failures);
+	    Console.Out.WriteLine("Result: {0} tests skipped," +
+		   " {1} known breakages, {2} fixed breakages",
+		   skips, xfails, xpasses);
 
 	    // Return a safe unix exit code
 	    return failures > 0 ? 1 : 0;
@@ -170,10 +176,18 @@ namespace Wv.Test
 	    expect_fail = true;
 	}
 
-	public static bool test(bool ok, string file, int line, string s)
+	public static void report(string result, string file, int line, string s)
 	{
 	    s = s.Replace("\n", "!");
 	    s = s.Replace("\r", "!");
+	    Console.WriteLine("! {0}:{1,-5} {2,-40} {3}",
+			      file, line, s,
+			      result);
+	    Console.Out.Flush();
+	}
+
+	public static bool test(bool ok, string file, int line, string s)
+	{
 	    string suffix = "";
 	    if (expect_fail)
 	    {
@@ -182,17 +196,32 @@ namespace Wv.Test
 		else
 		    suffix = " (expected fail!) FAILED";
 	    }
-	    Console.WriteLine("! {0}:{1,-5} {2,-40} {3}{4}",
-			      file, line, s,
-			      ok ? "ok" : "FAILED",
-			      suffix);
-	    Console.Out.Flush();
+	    report((ok ? "ok" : "FAILED") + suffix, file, line, s);
 	    expect_fail = false;
 
             if (!ok)
 	        throw new WvAssertionFailure(String.Format("{0}:{1} {2}", file, line, s));
 
 	    return ok;
+	}
+
+	public static bool xtest(bool ok, string file, int line, string s)
+	{
+	    // TODO/FIXME interaction with expect_fail
+	    report((ok ? "xpass" : "xfail"), file, line, s);
+
+	    if (ok)
+		xpasses++;
+	    else
+		xfails++;
+
+	    return ok;
+	}
+
+	public static void skip(string file, int line, string s)
+	{
+	    WvTest.report("skip", file, line, s);
+	    skips++;
 	}
 
 	public static void test_exception(string file, int line, string s)

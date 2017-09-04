@@ -30,7 +30,7 @@ if (!$pid) {
 
 my $istty = -t STDOUT && $ENV{'TERM'} ne "dumb";
 my @log = ();
-my ($gpasses, $gfails) = (0,0);
+my ($gpasses, $gfails, $gxpasses, $gxfails, $gskips) = (0,0,0,0,0);
 
 sub bigkill($)
 {
@@ -64,18 +64,31 @@ local $SIG{ALRM} = sub {
     bigkill($pid);
 };
 
+sub colourize_as($$)
+{
+    my ($result, $text) = @_;
+
+    if ($istty) {
+	my $colour;
+
+	if    ($result eq "ok")	    { $colour = "\e[32m"; }	# green
+	elsif ($result eq "xpass")  { $colour = "\e[34;1m"; }   # *blue*
+	elsif ($result eq "xfail")  { $colour = "\e[33m"; }     # yellow
+	elsif ($result eq "skip")   { $colour = "\e[36m"; }     # cyan
+	else			    { $colour = "\e[31;1m"; }   # *red*
+
+	return "$colour$text\e[0m";
+    } else {
+	return $text;
+    }
+}
+
 sub colourize($)
 {
     my $result = shift;
-    my $pass = ($result eq "ok");
-
-    if ($istty) {
-	my $colour = $pass ? "\e[32;1m" : "\e[31;1m";
-	return "$colour$result\e[0m";
-    } else {
-	return $result;
-    }
+    return colourize_as($result, $result);
 }
+
 
 sub mstime($$$)
 {
@@ -130,7 +143,6 @@ while (<$fh>)
         alarm(120);
 
 	my ($name, $result) = ($1, $2);
-	my $pass = ($result eq "ok");
 
 	if (!$start) {
 	    printf("\n! Startup: ");
@@ -139,15 +151,28 @@ while (<$fh>)
 
 	push @log, resultline($name, $result);
 
-	if (!$pass) {
+	if ($result eq "ok") {
+	    $gpasses++;
+	    print ".";
+	}
+	elsif ($result eq "xpass") {
+	    $gxpasses++;
+	    print colourize_as("xpass", "X");
+	}
+	elsif ($result eq "xfail") {
+	    $gxfails++;
+	    print colourize_as("xfail", "f");
+	}
+	elsif ($result eq "skip") {
+	    $gskips++;
+	    print colourize_as("skip", "s");
+	}
+	else {
 	    $gfails++;
 	    if (@log) {
 		print "\n" . join("\n", @log) . "\n";
 		@log = ();
 	    }
-	} else {
-	    $gpasses++;
-	    print ".";
 	}
     }
     else
@@ -178,10 +203,18 @@ if ($code != 0) {
     print resultline("Program returned non-zero exit code ($ret)", "FAILED");
 }
 
-my $gtotal = $gpasses+$gfails;
-printf("\nWvTest: %d test%s, %d failure%s, total time %s.\n",
+my $gtotal = $gpasses+$gfails+$gxpasses+$gxfails+$gskips;
+printf("\nWvTest: %d test%s, %s failure%s, total time %s.\n",
     $gtotal, $gtotal==1 ? "" : "s",
-    $gfails, $gfails==1 ? "" : "s",
+    $gfails>0 ? colourize_as("fail", "$gfails") : "$gfails",
+	$gfails==1 ? "" : "s",
     mstime(time() - $allstart, 2000, 5000));
+printf("WvTest: %s test%s skipped, %s known breakage%s, %s fixed breakage%s.\n",
+    $gskips>0 ? colourize_as("skip", "$gskips") : "$gskips",
+        $gskips==1 ? "" : "s",
+    $gxfails>0 ? colourize_as("xfail", "$gxfails"): "$gxfails",
+        $gxfails==1 ? "" : "s",
+    $gxpasses>0 ? colourize_as("xpass", "$gxpasses") : "$gxpasses",
+	$gxpasses==1 ? "" : "s");
 print STDERR "\nWvTest result code: $ret\n";
 exit( $ret ? $ret : ($gfails ? 125 : 0) );

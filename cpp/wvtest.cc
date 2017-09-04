@@ -90,7 +90,7 @@ static bool no_running_children()
 
 
 WvTest *WvTest::first, *WvTest::last;
-int WvTest::fails, WvTest::runs;
+int WvTest::fails, WvTest::runs, WvTest::xpasses, WvTest::xfails, WvTest::skips;
 time_t WvTest::start_time;
 bool WvTest::run_twice = false;
 
@@ -182,7 +182,7 @@ int WvTest::run_all(const char * const *prefixes)
 
     // there are lots of fflush() calls in here because stupid win32 doesn't
     // flush very often by itself.
-    fails = runs = 0;
+    fails = runs = xpasses = xfails = skips = 0;
     for (WvTest *cur = first; cur; cur = cur->next)
     {
 	if (cur->slowness <= max_slowness
@@ -258,6 +258,10 @@ int WvTest::run_all(const char * const *prefixes)
     printf("WvTest: %d test%s, %d failure%s.\n",
 	   runs, runs==1 ? "" : "s",
 	   fails, fails==1 ? "": "s");
+    printf("WvTest: %d test%s skipped, %d known breakage%s, %d fixed breakage%s.\n",
+           skips, skips==1 ? "" : "s",
+           xfails, xfails==1 ? "" : "s",
+           xpasses, xpasses==1 ? "" : "s");
     fflush(stdout);
 
     return fails != 0;
@@ -276,7 +280,7 @@ int WvTest::run_all(const char * const *prefixes)
 //
 // Yes, this is probably the worst API of all time.
 void WvTest::print_result(bool start, const char *_file, int _line,
-        const char *_condstr, bool result)
+        const char *_condstr, const char *result)
 {
     static char *file;
     static char *condstr;
@@ -299,18 +303,17 @@ void WvTest::print_result(bool start, const char *_file, int _line,
         }
     }
 
-    const char *result_str = result ? "ok\n" : "FAILED\n";
     if (run_twice)
     {
         if (!start)
-            printf(TEST_START_FORMAT "%s", file, line, condstr, result_str);
+            printf(TEST_START_FORMAT "%s\n", file, line, condstr, result);
     }
     else
     {
         if (start)
             printf(TEST_START_FORMAT, file, line, condstr);
         else
-            printf("%s", result_str);
+            printf("%s\n", result);
     }
     fflush(stdout);
 
@@ -328,11 +331,11 @@ void WvTest::print_result(bool start, const char *_file, int _line,
 void WvTest::start(const char *file, int line, const char *condstr)
 {
     // Either print the file, line, and condstr, or save them for later.
-    print_result(true, file, line, condstr, 0);
+    print_result(true, file, line, condstr, NULL);
 }
 
 
-void WvTest::check(bool cond)
+void WvTest::check_prologue()
 {
 #ifndef _WIN32
     alarm(MAX_TEST_TIME); // restart per-test timeout
@@ -349,7 +352,13 @@ void WvTest::check(bool cond)
 
     runs++;
 
-    print_result(false, NULL, 0, NULL, cond);
+}
+
+
+void WvTest::check(bool cond)
+{
+    check_prologue();
+    print_result(false, NULL, 0, NULL, cond ? "ok" : "FAILED");
 
     if (!cond)
     {
@@ -358,6 +367,26 @@ void WvTest::check(bool cond)
 	if (getenv("WVTEST_DIE_FAST"))
 	    abort();
     }
+}
+
+
+void WvTest::check_xfail(bool cond)
+{
+    check_prologue();
+    print_result(false, NULL, 0, NULL, cond ? "xpass" : "xfail");
+
+    if (cond)
+        xpasses++;
+    else
+        xfails++;
+}
+
+
+void WvTest::skip(const char *file, int line, const char *condstr)
+{
+    start(file, line, condstr);
+    print_result(false, NULL, 0, NULL, "skip");
+    skips++;
 }
 
 

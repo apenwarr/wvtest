@@ -160,8 +160,17 @@ lines above corresponds to one of them:
 
  - A failing assertion.  This is just like an 'ok' line, except
    the last word is something other than 'ok'.  Generally we use
-   FAILED here, but sometimes it's EXCEPTION, and it could be
-   something else instead, if you invent a new and improved way
+   FAILED and EXCEPTION here, but other possibilities exist too:
+
+	xfail - test was marked as known to fail and failed
+                (i.e. a known breakage)
+
+	xpass - test was marked as known to fail and passed
+                (i.e. previously known breakage is fixed)
+
+	skip  - test was skipped.
+
+   and it could be something else instead, if you invent a new and improved way
    to fail.
 
 
@@ -188,9 +197,10 @@ wvtestrun (and changed the FAILED to ok), it would produce this:
 	$ ./wvtestrun cat sample-ok
 
 	Testing "all" in cat sample-ok:
-	! mytest.t.cc  my ok test function: .. 0.010s ok
+	! mytest.t.cc  my ok test function: ..... 0.010s ok
 
-	WvTest: 2 tests, 0 failures, total time 0.010s.
+	WvTest: 5 tests, 0 failures, total time 0.010s.
+	WvTest: 0 tests skipped, 0 known breakages, 0 fixed breakages.
 
 	WvTest result code: 0
 
@@ -217,9 +227,10 @@ Now, what if the test had failed?  Then it would look like this:
 	! mytest.t.cc:432     thing.works()                 ok
 	This is just some crap that I printed while counting to 3.
 	! mytest.t.cc.433     3 < 4	                    FAILED
-	 0.000s ok
+	fXs 0.000s ok
 
-	WvTest: 2 tests, 1 failure, total time 0.000s.
+	WvTest: 5 tests, 1 failure, total time 0.000s.
+	WvTest: 1 test skipped, 1 known breakage, 1 fixed breakage.
 
 	WvTest result code: 0
 
@@ -235,14 +246,15 @@ then the failing, test functions:
 	$ ./wvtestrun cat sample-ok sample-error
 
 	Testing "all" in cat sample-ok sample-error:
-	! mytest.t.cc  my ok test function: .. 0.000s ok
+	! mytest.t.cc  my ok test function: ..... 0.000s ok
 	! mytest.t.cc  my error test function: .
 	! mytest.t.cc:432     thing.works()                 ok
 	This is just some crap that I printed while counting to 3.
 	! mytest.t.cc.433     3 < 4                         FAILED
-	 0.000s ok
+	fXs 0.000s ok
 
-	WvTest: 4 tests, 1 failure, total time 0.000s.
+	WvTest: 10 tests, 1 failure, total time 0.000s.
+	WvTest: 1 test skipped, 1 known breakage, 1 fixed breakage.
 
 	WvTest result code: 0
 
@@ -359,6 +371,43 @@ Where did you get the awesome idea to use a protocol instead of an API?
 	test, although in a less general way.  Naturally, you
 	shouldn't blame them for how I mangled their ideas, but
 	I never would have thought of it if it weren't for them.
+
+Why xfail/xpass/skip are neeeded at all?
+
+	Suppose, you have a test which you expect to pass, but which is
+	failing (in the usual sense of it). You have two choices: 1) fix it
+	right now, and 2) defer fixing. In some cases one starts from
+	situations, when lots of test fail initially, and in order to make
+	gradual progress, it makes sense to mark those presently-failing tests
+	as "I know, it fails".
+
+	Another use-case for this is also when tests always pass on e.g.
+	Linux, and some of them fail on Win32 due to differences in
+	enviroment, and one does not want to concentrate on fixing win32 yet.
+
+	So when you run tests again, you'd like to differentiate between
+	failing tests marked as xfail (known to fail) and new failing tests.
+	The latter should produce real FAILURE with details. xfail on the
+	other hand should produce just a small warning/reminder (i'm failing
+	here, please don't forget to fix me).
+
+	That's the idea.
+
+	So now let's think about what happens when a test marked as XFAIL
+	instead of failing passes? It's not a failure - quite differently, it
+	_was_ a failure, and now it passes, so what should we do? Right, we
+	should tell the user that "hey, a test which used to fail now passes!
+	you probably would want to mark it back as PASS".
+
+	This is how xfail/xpass works.
+
+	I know, you could think about it being unneeded, especially keeping in
+	mind initial words that testing is only true or false, and if it's
+	false, you loose.
+
+	With introduction of XFAIL it's no longer strictly true or false, but
+	still minimalistic and practical.
+
 
 Who should I complain to about WvTest?
 

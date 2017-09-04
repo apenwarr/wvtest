@@ -33,6 +33,9 @@ if __name__ != '__main__':   # we're imported as a module
     _registered = []
     _tests = 0
     _fails = 0
+    _xpasses = 0
+    _xfails = 0
+    _skips = 0
 
     def wvtest(func, innerfunc=None):
         """ Use this decorator (@wvtest) in front of any function you want to
@@ -43,11 +46,37 @@ if __name__ != '__main__':   # we're imported as a module
         _registered.append((func, innerfunc or func))
         return func
 
+    def wvskip(func):
+        """ Use this decorator (@wvskip) to mark test as skipped """
+        # ensure original func is removed from runtests
+        try:
+            _registered.remove((func, func))
+        except ValueError:
+            pass
+
+        tb = traceback.extract_stack()[-2]
+        def skipper():
+            _result(func.func_name, tb, 'skip')
+
+        # minimal tweaks so that inspect thinks skipper is from func place
+        skipper.func_name = func.func_name
+        skipper.__module__ = func.__module__
+
+        _registered.append((skipper, skipper))
 
     def _result(msg, tb, code):
-        global _tests, _fails
+        global _tests, _fails, _xpasses, _xfails, _skips
         _tests += 1
-        if code != 'ok':
+        if code == 'ok':
+            # _passes +=1
+            pass
+        elif code == 'xpass':
+            _xpasses += 1
+        elif code == 'xfail':
+            _xfails += 1
+        elif code == 'skip':
+            _skips += 1
+        else:
             _fails += 1
         (filename, line, func, text) = tb
         filename = os.path.basename(filename)
@@ -57,7 +86,6 @@ if __name__ != '__main__':   # we're imported as a module
                               code)
         sys.stdout.flush()
 
-
     def _check(cond, msg, xdepth):
         tb = traceback.extract_stack()[-3 - xdepth]
         if cond:
@@ -65,7 +93,6 @@ if __name__ != '__main__':   # we're imported as a module
         else:
             _result(msg, tb, 'FAILED')
         return cond
-
 
     def _code(xdepth):
         (filename, line, func, text) = traceback.extract_stack()[-3 - xdepth]
@@ -88,6 +115,12 @@ if __name__ != '__main__':   # we're imported as a module
     def WVPASSISNOT(a, b, xdepth = 0):
         ''' Counts a test failure unless a is not b. '''
         return _check(a is not b, '%s is not %s' % (repr(a), repr(b)), xdepth)
+
+    def WVXFAIL(cond, xdepth = 0):
+        ''' Counts a known/fixed test failure if cond is false/true '''
+        tb = traceback.extract_stack()[-2]
+        res = cond and 'xpass' or 'xfail'
+        _result(_code(xdepth), tb, res)
 
     def WVPASSEQ(a, b, xdepth = 0):
         ''' Counts a test failure unless a == b. '''
@@ -243,6 +276,8 @@ def wvtest_main(extra_testfiles=[]):
     print
     print 'WvTest: %d tests, %d failures.' % (_wvtestmod._tests,
                                               _wvtestmod._fails)
+    print 'WvTest: %d tests skipped, %d known breakages, %d fixed breakages' % (
+            _wvtestmod._skips, _wvtestmod._xfails, _wvtestmod._xpasses)
 
 
 if __name__ == '__main__':

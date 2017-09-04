@@ -21,6 +21,10 @@ public class WvTestTest
 	    WVFAIL("");
 	    WVFAIL(null);
 
+	    WVXFAIL(0);
+	    WVXFAIL(1);
+	    WVSKIP(non-existent);
+
 	    WVPASSEQ(7, 7);
 	    WVPASSEQ("foo", "foo");
 	    WVPASSEQ("", "");

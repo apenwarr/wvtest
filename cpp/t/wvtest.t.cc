@@ -3,6 +3,10 @@
 WVTEST_MAIN("wvtest tests")
 {
     WVPASS(1);
+    WVXFAIL(0);
+    WVXFAIL(1);
+    WVSKIP(non-existent);
+
     WVPASSEQ(1, 1);
     WVPASSNE(1, 2);
     WVPASSEQ(1, 1);

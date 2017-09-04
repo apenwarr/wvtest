@@ -59,6 +59,16 @@ def booga1():
 
 
 @wvtest
+def test_xfail():
+    # ensure WVXFAIL
+    WVXFAIL(False)
+    WVXFAIL(True)
+
+@wvskip
+def test_skip():
+    non-existent
+
+@wvtest
 def chdir_test():
     WVPASS(open('testfile.txt')) # will fail if chdir is wrong
 

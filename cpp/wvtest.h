@@ -23,19 +23,23 @@ class WvTest
     int slowness;
     WvTest *next;
     static WvTest *first, *last;
-    static int fails, runs;
+    static int fails, runs, xpasses, xfails, skips;
     static time_t start_time;
     static bool run_twice;
 
     static void alarm_handler(int sig);
 
     static void print_result(bool start, const char *file, int line,
-            const char *condstr, bool result);
+            const char *condstr, const char *result);
+
+    static void check_prologue();
 public:
     WvTest(const char *_descr, const char *_idstr, MainFunc *_main, int _slow);
     static int run_all(const char * const *prefixes = NULL);
     static void start(const char *file, int line, const char *condstr);
     static void check(bool cond);
+    static void check_xfail(bool cond);
+    static void skip(const char *file, int line, const char *condstr);
     static inline bool start_check(const char *file, int line,
 				   const char *condstr, bool cond)
         { start(file, line, condstr); check(cond); return cond; }
@@ -64,6 +68,16 @@ public:
     WvTest::start_check_eq(__FILE__, __LINE__, (a), (b), false)
 #define WVPASSNE(a, b) WVFAILEQ(a, b)
 #define WVFAILNE(a, b) WVPASSEQ(a, b)
+
+#define WVXFAIL(cond) do { \
+    WvTest::start(__FILE__, __LINE__, #cond); \
+    WvTest::check_xfail(cond); \
+} while (0)
+
+#define WVSKIP(cond) \
+    WvTest::skip(__FILE__, __LINE__, #cond)
+
+
 
 #define WVTEST_MAIN3(descr, ff, ll, slowness) \
     static void _wvtest_main_##ll(); \
