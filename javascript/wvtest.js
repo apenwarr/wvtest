@@ -14,19 +14,28 @@ function lookup(filename, line) {
 }
 
 
-// TODO(apenwarr): Right now this only really works right on chrome.
-// Maybe take some advice from this article:
-//  http://stackoverflow.com/questions/5358983/javascript-stack-inspection-on-safari-mobile-ipad
+function _v_ery_identifiable_stack_function() {
+    return Error().stack;
+}
+
+
 function trace() {
-    var FILELINE_RE = /[\b\s]\(?([^:\s]+):(\d+)/;
+    var FILELINE_RE = /([^@\(:\s]+\.js):(\d+)/;
     var out = [];
-    var e = Error().stack;
+    var e = _v_ery_identifiable_stack_function();
     if (!e) {
         return [['UNKNOWN', 0], ['UNKNOWN', 0]];
     }
     var lines = e.split('\n');
+    var active = 0
     for (i in lines) {
-	if (i > 2) {
+        if (!active && lines[i].match(/_v_ery_identifiable_stack_function/)) {
+            // skip any gunk before the trace
+            active = 1;
+        } else if (active == 1) {
+            // skip trace() itself
+            active = 2;
+        } else if (active) {
 	    g = lines[i].match(FILELINE_RE);
 	    if (g) {
 		out.push([g[1], parseInt(g[2])]);
