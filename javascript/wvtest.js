@@ -10,7 +10,7 @@ function lookup(filename, line) {
             f = files[filename] = [];
         }
     }
-    return f[line-1] || 'BAD_LINE'; // file line numbers are 1-based
+    return f[line - 1] || 'BAD_LINE'; // file line numbers are 1-based
 }
 
 
@@ -27,7 +27,7 @@ function trace() {
         return [['UNKNOWN', 0], ['UNKNOWN', 0]];
     }
     var lines = e.split('\n');
-    var active = 0
+    var active = 0;
     for (i in lines) {
         if (!active && lines[i].match(/_v_ery_identifiable_stack_function/)) {
             // skip any gunk before the trace
@@ -36,13 +36,13 @@ function trace() {
             // skip trace() itself
             active = 2;
         } else if (active) {
-	    g = lines[i].match(FILELINE_RE);
-	    if (g) {
-		out.push([g[1], parseInt(g[2])]);
-	    } else {
-		out.push(['UNKNOWN', 0]);
-	    }
-	}
+            g = lines[i].match(FILELINE_RE);
+            if (g) {
+                out.push([g[1], parseInt(g[2])]);
+            } else {
+                out.push(['UNKNOWN', 0]);
+            }
+        }
     }
     return out;
 }
@@ -51,7 +51,7 @@ function trace() {
 function _pad(len, s) {
     s += '';
     while (s.length < len) {
-	s += ' ';
+        s += ' ';
     }
     return s;
 }
@@ -59,8 +59,8 @@ function _pad(len, s) {
 
 function _check(cond, trace, condstr) {
     print('!', _pad(15, trace[0] + ':' + trace[1]),
-	  _pad(54, condstr),
-	  cond ? 'ok' : 'FAILED');
+          _pad(54, condstr),
+          cond ? 'ok' : 'FAILED');
 }
 
 
@@ -75,12 +75,12 @@ function _content(trace) {
 function WVPASS(cond) {
     var t = trace()[1];
     if (arguments.length >= 1) {
-	var condstr = _content(t);
-	return _check(cond, t, condstr);
+        var condstr = _content(t);
+        return _check(cond, t, condstr);
     } else {
-	// WVPASS() with no arguments is a pass, although cond would
-	// default to false
-	return _check(true, t, '');
+        // WVPASS() with no arguments is a pass, although cond would
+        // default to false
+        return _check(true, t, '');
     }
 }
 
@@ -88,12 +88,12 @@ function WVPASS(cond) {
 function WVFAIL(cond) {
     var t = trace()[1];
     if (arguments.length >= 1) {
-	var condstr = 'NOT(' + _content(t) + ')';
-	return _check(!cond, t, condstr);
+        var condstr = 'NOT(' + _content(t) + ')';
+        return _check(!cond, t, condstr);
     } else {
-	// WVFAIL() with no arguments is a fail, although cond would
-	// default to false (which is a pass)
-	return _check(false, t, 'NOT()')
+        // WVFAIL() with no arguments is a fail, although cond would
+        // default to false (which is a pass)
+        return _check(false, t, 'NOT()');
     }
 }
 
@@ -101,9 +101,9 @@ function WVFAIL(cond) {
 function WVEXCEPT(etype, func) {
     var t = trace()[1];
     try {
-	func();
+        func();
     } catch (e) {
-	return _check(e instanceof etype, t, e);
+        return _check(e instanceof etype, t, e);
     }
     return _check(false, t, 'no exception: ' + etype);
 }
@@ -115,7 +115,7 @@ function WVPASSEQ(a, b, precision) {
         a = a.join('|');
         b = b.join('|');
     }
-    var cond = precision ? Math.abs(a-b) < precision : (a == b);
+    var cond = precision ? Math.abs(a - b) < precision : (a == b);
     return _check(cond, t, '' + a + ' == ' + b);
 }
 
@@ -126,7 +126,7 @@ function WVPASSNE(a, b, precision) {
         a = a.join('|');
         b = b.join('|');
     }
-    var cond = precision ? Math.abs(a-b) >= precision : (a != b);
+    var cond = precision ? Math.abs(a - b) >= precision : (a != b);
     return _check(a != b, t, '' + a + ' != ' + b);
 }
 
