@@ -41,12 +41,12 @@ _wvcheck()
 	CODE="$1"
 	TEXT=$(_wvtextclean "$2")
 	OK=ok
-	if [ "$CODE" -ne 0 ]; then
+	if ! [ "$CODE" -eq 0 ]; then
 		OK=FAILED
 	fi
 	echo "! $WVCALLER_FILE:$WVCALLER_LINE  $TEXT  $OK" >&2
-	if [ "$CODE" -ne 0 ]; then
-		exit $CODE
+	if ! [ "$CODE" -eq 0 ]; then
+		exit "$CODE"
 	else
 		return 0
 	fi
@@ -88,7 +88,7 @@ WVFAIL()
 _wvgetrv()
 {
 	( "$@" >&2 )
-	echo -n $?
+	printf "%d" "$?"
 }
 
 
