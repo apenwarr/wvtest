@@ -1,0 +1,11 @@
+#!/bin/sh
+# Returns 0 (success) if the given program is runnable.
+#
+# This is better than using [ -x /usr/bin/program ] because it avoids
+# the need to hardcode the program's path; it searches $PATH instead.
+#
+if [ $# != 1 ]; then
+  echo "usage: $0 <programname>" >&2
+  exit 1
+fi
+type "$1" >/dev/null 2>&1

@@ -4,14 +4,14 @@ all: build
 	@echo "Try: make test"
 
 build:
-	$(MAKE) -C dotnet all
+	false || ! runnable gmcs || $(MAKE) -C dotnet all
 	$(MAKE) -C cpp all
 	$(MAKE) -C c all
 
 runtests: build
 	$(MAKE) -C sh runtests
 	$(MAKE) -C python runtests
-	$(MAKE) -C dotnet runtests
+	false || ! runnable gmcs || $(MAKE) -C dotnet runtests
 	$(MAKE) -C cpp runtests
 	$(MAKE) -C c runtests
 	$(MAKE) -C javascript runtests
