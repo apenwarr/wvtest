@@ -50,6 +50,8 @@ public:
                                bool expect_pass);
     static bool start_check_eq(const char *file, int line, int a, int b,
                                bool expect_pass);
+    static bool start_check_eq(const char *file, int line, double a, double b, double c,
+                               bool expect_pass);
     static bool start_check_lt(const char *file, int line,
                                const char *a, const char *b);
     static bool start_check_lt(const char *file, int line, int a, int b);
@@ -60,14 +62,20 @@ public:
     WvTest::start_check(__FILE__, __LINE__, #cond, (cond))
 #define WVPASSEQ(a, b) \
     WvTest::start_check_eq(__FILE__, __LINE__, (a), (b), true)
+#define WVPASSEQ_DOUBLE(a, b, c) \
+    WvTest::start_check_eq(__FILE__, __LINE__, (a), (b), (c), true)
 #define WVPASSLT(a, b) \
     WvTest::start_check_lt(__FILE__, __LINE__, (a), (b))
 #define WVFAIL(cond) \
     WvTest::start_check(__FILE__, __LINE__, "NOT(" #cond ")", !(cond))
 #define WVFAILEQ(a, b) \
     WvTest::start_check_eq(__FILE__, __LINE__, (a), (b), false)
+#define WVFAILEQ_DOUBLE(a, b, c) \
+    WvTest::start_check_eq(__FILE__, __LINE__, (a), (b), (c), false)
 #define WVPASSNE(a, b) WVFAILEQ(a, b)
+#define WVPASSNE_DOUBLE(a, b, c) WVFAILEQ_DOUBLE(a, b, c)
 #define WVFAILNE(a, b) WVPASSEQ(a, b)
+#define WVABS(x) ((x)<0 ? -(x) : (x))
 
 #define WVXFAIL(cond) do { \
     WvTest::start(__FILE__, __LINE__, #cond); \

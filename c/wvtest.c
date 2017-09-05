@@ -38,13 +38,14 @@
 static int fails, runs, xpasses, xfails, skips;
 static time_t start_time;
 static bool run_twice;
-
 static void alarm_handler(int sig);
+
 
 static int memerrs()
 {
     return (int)VALGRIND_COUNT_ERRORS;
 }
+
 
 static int memleaks()
 {
@@ -59,6 +60,7 @@ static int memleaks()
     // return leaked+dubious+reachable;
     return leaked;
 }
+
 
 // Return 1 if no children are running or zombies, 0 if there are any running
 // or zombie children.
@@ -114,6 +116,7 @@ static const char *pathstrip(const char *filename)
     return filename;
 }
 
+
 static bool prefix_match(const char *s, char * const *prefixes)
 {
     char *const *prefix;
@@ -125,8 +128,8 @@ static bool prefix_match(const char *s, char * const *prefixes)
     return false;
 }
 
-static struct WvTest *wvtest_first, *wvtest_last;
 
+static struct WvTest *wvtest_first, *wvtest_last;
 void wvtest_register(struct WvTest *ptr)
 {
 	if (wvtest_first == NULL)
@@ -136,6 +139,7 @@ void wvtest_register(struct WvTest *ptr)
 	wvtest_last = ptr;
 	wvtest_last->next = NULL;
 }
+
 
 int wvtest_run_all(char * const *prefixes)
 {
@@ -328,12 +332,14 @@ static void print_result_str(bool start, const char *_file, int _line,
     }
 }
 
+
 static inline void
 print_result(bool start, const char *file, int line,
 	     const char *condstr, bool result)
 {
 	print_result_str(start, file, line, condstr, result ? "ok" : "FAILED");
 }
+
 
 void wvtest_start(const char *file, int line, const char *condstr)
 {
@@ -415,6 +421,25 @@ bool wvtest_start_check_eq(const char *file, int line,
 }
 
 
+bool wvtest_start_check_eq_double(const char *file, int line,
+				 double a, double b, double c, bool expect_pass)
+{
+    size_t len = 11 + 11 + 11 + 8 + 1;
+    char *str = malloc(len);
+    sprintf(str, "%f %s %f eps %f", a, expect_pass ? "==" : "!=", b, c);
+
+    wvtest_start(file, line, str);
+    free(str);
+
+    bool cond = ( WVABS(a - b) <= WVABS(c) );
+    if (!expect_pass)
+      cond = !cond;
+
+    wvtest_check(cond, NULL);
+    return cond;
+}
+
+
 bool wvtest_start_check_lt(const char *file, int line,
 			   int a, int b)
 {
@@ -429,6 +454,8 @@ bool wvtest_start_check_lt(const char *file, int line,
     wvtest_check(cond, NULL);
     return cond;
 }
+
+
 bool wvtest_start_check_eq_str(const char *file, int line,
 			       const char *a, const char *b, bool expect_pass)
 {
