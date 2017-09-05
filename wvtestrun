@@ -138,11 +138,12 @@ while (<$fh>)
 	@log = ();
 	$start = $stop;
     }
-    elsif (/^!\s*(.*?)\s+(\S+)\s*$/)
+    elsif (/^!\s*(.*?\s(?:(\S+)\s)?)(\S+)\s*$/)
     {
         alarm(120);
 
-	my ($name, $result) = ($1, $2);
+	my ($name, $result2, $result) = ($1, $2, $3);
+	$result2 ||= "";
 
 	if (!$start) {
 	    printf("\n! Startup: ");
@@ -152,22 +153,20 @@ while (<$fh>)
 	push @log, resultline($name, $result);
 
 	if ($result eq "ok") {
-	    $gpasses++;
-	    print ".";
-	}
-	elsif ($result eq "xpass") {
-	    $gxpasses++;
-	    print colourize_as("xpass", "X");
-	}
-	elsif ($result eq "xfail") {
-	    $gxfails++;
-	    print colourize_as("xfail", "f");
-	}
-	elsif ($result eq "skip") {
-	    $gskips++;
-	    print colourize_as("skip", "s");
-	}
-	else {
+	    if ($result2 eq "xpass") {
+	        $gxpasses++;
+	        print colourize_as("xpass", "X");
+            } elsif ($result2 eq "xfail") {
+                $gxfails++;
+                print colourize_as("xfail", "f");
+            } elsif ($result2 eq "skip") {
+                $gskips++;
+                print colourize_as("skip", "s");
+            } else {
+                $gpasses++;
+                print ".";
+            }
+        } else {
 	    $gfails++;
 	    if (@log) {
 		print "\n" . join("\n", @log) . "\n";

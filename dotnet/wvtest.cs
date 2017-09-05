@@ -208,7 +208,7 @@ namespace Wv.Test
 	public static bool xtest(bool ok, string file, int line, string s)
 	{
 	    // TODO/FIXME interaction with expect_fail
-	    report((ok ? "xpass" : "xfail"), file, line, s);
+	    report((ok ? "xpass ok" : "xfail ok"), file, line, s);
 
 	    if (ok)
 		xpasses++;
@@ -220,7 +220,7 @@ namespace Wv.Test
 
 	public static void skip(string file, int line, string s)
 	{
-	    WvTest.report("skip", file, line, s);
+	    WvTest.report("skip ok", file, line, s);
 	    skips++;
 	}
 

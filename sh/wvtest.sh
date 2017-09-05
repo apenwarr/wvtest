@@ -98,10 +98,10 @@ WVXFAIL()
 
 	_wvfind_caller
 	if "$@"; then
-		_wvreport xpass "$TEXT"
+		_wvreport "xpass ok" "$TEXT"
 		return 0
 	else
-		_wvreport xfail "$TEXT"
+		_wvreport "xfail ok" "$TEXT"
 		return 0
 	fi
 }
@@ -109,7 +109,7 @@ WVXFAIL()
 WVSKIP()
 {
 	_wvfind_caller
-	_wvreport skip "$*"
+	_wvreport "skip ok" "$*"
 }
 
 

@@ -385,7 +385,7 @@ void wvtest_check(bool cond, const char *reason)
 void wvtest_check_xfail(bool cond)
 {
     check_prologue();
-    print_result_str(false, NULL, 0, NULL, cond ? "xpass" : "xfail");
+    print_result_str(false, NULL, 0, NULL, cond ? "xpass ok" : "xfail ok");
 
     if (cond)
         xpasses++;
@@ -397,7 +397,7 @@ void wvtest_check_xfail(bool cond)
 void wvtest_skip(const char *file, int line, const char *condstr)
 {
     wvtest_start(file, line, condstr);
-    print_result_str(false, NULL, 0, NULL, "skip");
+    print_result_str(false, NULL, 0, NULL, "skip ok");
     skips++;
 }
 

@@ -56,7 +56,7 @@ if __name__ != '__main__':   # we're imported as a module
 
         tb = traceback.extract_stack()[-2]
         def skipper():
-            _result(func.func_name, tb, 'skip')
+            _result(func.func_name, tb, 'skip ok')
 
         # minimal tweaks so that inspect thinks skipper is from func place
         skipper.func_name = func.func_name
@@ -70,11 +70,11 @@ if __name__ != '__main__':   # we're imported as a module
         if code == 'ok':
             # _passes +=1
             pass
-        elif code == 'xpass':
+        elif code == 'xpass ok':
             _xpasses += 1
-        elif code == 'xfail':
+        elif code == 'xfail ok':
             _xfails += 1
-        elif code == 'skip':
+        elif code == 'skip ok':
             _skips += 1
         else:
             _fails += 1
@@ -119,7 +119,7 @@ if __name__ != '__main__':   # we're imported as a module
     def WVXFAIL(cond, xdepth = 0):
         ''' Counts a known/fixed test failure if cond is false/true '''
         tb = traceback.extract_stack()[-2]
-        res = cond and 'xpass' or 'xfail'
+        res = cond and 'xpass ok' or 'xfail ok'
         _result(_code(xdepth), tb, res)
 
     def WVPASSEQ(a, b, xdepth = 0):

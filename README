@@ -159,16 +159,16 @@ lines above corresponds to one of them:
    last part of a test.
 
  - A failing assertion.  This is just like an 'ok' line, except
-   the last word is something other than 'ok'.  Generally we use
-   FAILED and EXCEPTION here, but other possibilities exist too:
+   augmented with extra detail.  A more advanced parser could choose to
+   parse the extra string to count partial failures:
 
-	xfail - test was marked as known to fail and failed
+	xfail ok - test was marked as known to fail and failed
                 (i.e. a known breakage)
 
-	xpass - test was marked as known to fail and passed
+	xpass ok - test was marked as known to fail and passed
                 (i.e. previously known breakage is fixed)
 
-	skip  - test was skipped.
+	skip ok - test was skipped.
 
    and it could be something else instead, if you invent a new and improved way
    to fail.
@@ -372,42 +372,38 @@ Where did you get the awesome idea to use a protocol instead of an API?
 	shouldn't blame them for how I mangled their ideas, but
 	I never would have thought of it if it weren't for them.
 
-Why xfail/xpass/skip are neeeded at all?
+Why are xfail/xpass/skip needed at all?
 
-	Suppose, you have a test which you expect to pass, but which is
-	failing (in the usual sense of it). You have two choices: 1) fix it
-	right now, and 2) defer fixing. In some cases one starts from
-	situations, when lots of test fail initially, and in order to make
-	gradual progress, it makes sense to mark those presently-failing tests
-	as "I know, it fails".
+	Suppose you have a test which you expect to pass, but which is
+	failing (in the usual sense).  You have two choices: 1) fix it right
+	now, or 2) defer fixing.  Sometimes at the start we have lots of
+	tests failing, and in order to make gradual progress, it makes sense
+	to mark those presently-failing tests as "I know, it fails".
 
-	Another use-case for this is also when tests always pass on e.g.
-	Linux, and some of them fail on Win32 due to differences in
-	enviroment, and one does not want to concentrate on fixing win32 yet.
+	Another use case is when tests always pass on e.g.  Linux, but some
+	of them fail on Win32 due to differences in environment, and one
+	does not want to concentrate on fixing win32 yet.
 
 	So when you run tests again, you'd like to differentiate between
 	failing tests marked as xfail (known to fail) and new failing tests.
 	The latter should produce real FAILURE with details. xfail on the
-	other hand should produce just a small warning/reminder (i'm failing
+	other hand should produce just a small warning/reminder (I'm failing
 	here, please don't forget to fix me).
 
 	That's the idea.
 
-	So now let's think about what happens when a test marked as XFAIL
-	instead of failing passes? It's not a failure - quite differently, it
-	_was_ a failure, and now it passes, so what should we do? Right, we
-	should tell the user that "hey, a test which used to fail now passes!
-	you probably would want to mark it back as PASS".
+	So now what happens when a test marked as xfail passes anyway
+	instead of the expected failure?  That's not a failure - quite
+	differently, it _was_ a failure, and now it passes, so what should
+	we do?  Right, we should tell the user that "hey, a test which used
+	to fail now passes!  You probably would want to mark it back as
+	PASS".
 
 	This is how xfail/xpass works.
 
-	I know, you could think about it being unneeded, especially keeping in
-	mind initial words that testing is only true or false, and if it's
-	false, you loose.
-
-	With introduction of XFAIL it's no longer strictly true or false, but
-	still minimalistic and practical.
-
+	With introduction of xfail tests are no longer strictly true or
+	false, but you can ignore the additional information if you want
+	(the last word is still either "ok" or not).
 
 Who should I complain to about WvTest?
 
