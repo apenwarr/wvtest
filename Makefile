@@ -1,20 +1,21 @@
 
+DIRS=sh python dotnet cpp c javascript
+
 all: build
 	@echo
 	@echo "Try: make test"
 
 build:
-	false || ! runnable gmcs || $(MAKE) -C dotnet all
-	$(MAKE) -C cpp all
-	$(MAKE) -C c all
+	set -e; for d in $(DIRS); do \
+		if [ "$$d" = "dotnet" ] && ! runnable gmcs; then continue; fi; \
+		$(MAKE) -C $$d all; \
+	done
 
 runtests: build
-	$(MAKE) -C sh runtests
-	$(MAKE) -C python runtests
-	false || ! runnable gmcs || $(MAKE) -C dotnet runtests
-	$(MAKE) -C cpp runtests
-	$(MAKE) -C c runtests
-	$(MAKE) -C javascript runtests
+	set -e; for d in $(DIRS); do \
+		if [ "$$d" = "dotnet" ] && ! runnable gmcs; then continue; fi; \
+		$(MAKE) -C $$d runtests; \
+	done
 
 
 test: build
@@ -22,8 +23,6 @@ test: build
 
 clean::
 	rm -f *~ .*~
-	$(MAKE) -C sh clean
-	$(MAKE) -C python clean
-	$(MAKE) -C dotnet clean
-	$(MAKE) -C cpp clean
-	$(MAKE) -C c clean
+	set -e; for d in $(DIRS); do \
+		$(MAKE) -C $$d clean; \
+	done

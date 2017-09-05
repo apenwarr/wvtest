@@ -1,7 +1,6 @@
 
 all:
 	@echo "Try: make test"
-	@false
 
 runtests:
 	t/twvtest.sh
