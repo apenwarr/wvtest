@@ -144,6 +144,8 @@ wvtest('trace parsing', function() {
     var got_stack = _trace({ stack: str });
     print('Want:', want_stack.join(' | '));
     print(' Got:', got_stack.join(' | '));
+    WVPASS(got_stack.full);
+    WVPASSEQ(str, got_stack.full);
     if (WVPASSEQ(want_stack.length, got_stack.length)) {
       for (var j in want_stack) {
         WVPASSEQ(want_stack[j][0], got_stack[j][0]);

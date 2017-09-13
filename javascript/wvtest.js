@@ -40,8 +40,11 @@ function _trace(e) {
     var out = [];
 
     if (!e || !e.stack) {
-        return [['undefined-stack-1', 0]];
+        out.full = 'undefined-stack-1:0';
+        out.push(['undefined-stack-1', 0]);
+        return out;
     }
+
     var found_line = -2;
     var lines = e.stack.split('\n');
     for (i in lines) {
@@ -54,13 +57,13 @@ function _trace(e) {
         }
         if (g) {
             out.push([g[1], parseInt(g[2])]);
-        } else {
-            //out.push(['UNKNOWN-row', 0]);
         }
     }
 
     // skip _VISF_RE and one additional line (its caller), if found
-    return out.slice(found_line + 2);
+    out = out.slice(found_line + 2);
+    out.full = e.stack;
+    return out;
 }
 
 
@@ -68,10 +71,6 @@ function trace() {
     var e = _v_ery_identifiable_stack_function();
     return _trace(e);
 }
-
-
-// run trace() once to calibrate _gunk_offset
-trace();
 
 
 function _pad(len, s) {
@@ -84,14 +83,19 @@ function _pad(len, s) {
 
 
 function _check(cond, trace, condstr) {
-    if (!trace.length) trace = [['missing-trace', 0]];
-    if (!cond) print('\nBacktrace:\n' + (new Error()).stack);
     try {
+        if (!trace.length) trace.push(['missing-trace', 0]);
+        if (!cond) {
+	    var full = trace.full;
+	    print('\nBacktrace:\n  ' + full.split('\n').join('\n  '));
+	}
         print('!', _pad(15, trace[0][0] + ':' + trace[0][1]),
               _pad(54, _clean(condstr)),
               cond ? 'ok' : 'FAILED');
         return cond;
     } catch (e) {
+        print('eek! e.full:', e.full);
+        print('eek! Backtrace:', (new Error()).stack);
         print('! wvtest exception: ' + e + ' FAILED');
         throw e;
     }
