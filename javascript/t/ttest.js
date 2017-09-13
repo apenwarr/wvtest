@@ -47,6 +47,6 @@ wvtest('selftests', function() {
     WVPASSEQ(read('t/empty'), '');
     WVPASSEQ(read('t/hello'), 'hello world');
     WVEXCEPT(Error, function() { read('.') });
-    WVEXCEPT(Error, function() { load('missing') });
+    WVEXCEPT(Error, function() { load('nonexistent_file') });
     WVPASSEQ(load('t/empty'), undefined);
 });
