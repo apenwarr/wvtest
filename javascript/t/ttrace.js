@@ -141,7 +141,7 @@ wvtest('trace parsing', function() {
     var str = TEST_STACKS[i][0];
     print('Parsing: "' + str + '"');
     var want_stack = TEST_STACKS[i][1];
-    var got_stack = _trace({ stack: str });
+    var got_stack = wvtest_parse_trace({ stack: str });
     print('Want:', want_stack.join(' | '));
     print(' Got:', got_stack.join(' | '));
     WVPASS(got_stack.full);
@@ -157,7 +157,7 @@ wvtest('trace parsing', function() {
 
 
 wvtest('trace generation', function() {
-  t = trace();
+  t = wvtest_trace();
   print('Self trace:', t.join(' | '));
   WVPASS(t[0][0].match(/ttrace\.js$/));
 });

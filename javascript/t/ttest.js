@@ -1,6 +1,6 @@
 
 function print_trace() {
-    print(trace())
+    print(wvtest_trace())
 }
 
 
