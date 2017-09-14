@@ -84,8 +84,9 @@ function _wvtest_pad(len, s) {
 function wvtest_check(cond, trace, condstr) {
     try {
         if (!trace.length) trace.push(['missing-trace', 0]);
+        if (!trace.full) trace.full = trace.join('\n');
         if (!cond) {
-	    var full = trace.full;
+	    var full = trace.full + '';
 	    print('\nBacktrace:\n  ' + full.split('\n').join('\n  '));
 	}
         print('!', _wvtest_pad(15, trace[0][0] + ':' + trace[0][1]),
