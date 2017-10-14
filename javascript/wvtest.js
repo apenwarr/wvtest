@@ -1,3 +1,4 @@
+'use strict';
 
 var _wvtest_files = {};
 
@@ -46,7 +47,8 @@ function wvtest_parse_trace(e) {
 
     var found_line = -2;
     var lines = e.stack.split('\n');
-    for (i in lines) {
+    for (var i in lines) {
+        var g;
         if (lines[i].match(_wvtest_VISF_RE)) {
             found_line = out.length;
         }
@@ -86,9 +88,9 @@ function wvtest_check(cond, trace, condstr) {
         if (!trace.length) trace.push(['missing-trace', 0]);
         if (!trace.full) trace.full = trace.join('\n');
         if (!cond) {
-	    var full = trace.full + '';
-	    print('\nBacktrace:\n  ' + full.split('\n').join('\n  '));
-	}
+            var full = trace.full + '';
+            print('\nBacktrace:\n  ' + full.split('\n').join('\n  '));
+        }
         print('!', _wvtest_pad(15, trace[0][0] + ':' + trace[0][1]),
               _wvtest_pad(54, _wvtest_clean(condstr)),
               cond ? 'ok' : 'FAILED');
@@ -106,7 +108,7 @@ function _wvtest_content(tracerow) {
     var WV_RE = /WV[\w_]+\((.*)\)/;
     var line = _wvtest_lookup(tracerow[0], tracerow[1]);
     var g = line.match(WV_RE);
-    return g ? g[1] : _clean(line);
+    return g ? g[1] : _wvtest_clean(line);
 }
 
 

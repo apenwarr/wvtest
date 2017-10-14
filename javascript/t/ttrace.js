@@ -1,3 +1,5 @@
+'use strict';
+
 var TEST_STACKS = [
 
 // v8shell command line
@@ -157,7 +159,7 @@ wvtest('trace parsing', function() {
 
 
 wvtest('trace generation', function() {
-  t = wvtest_trace();
+  var t = wvtest_trace();
   print('Self trace:', t.join(' | '));
   WVPASS(t[0][0].match(/ttrace\.js$/));
 });

@@ -1,3 +1,4 @@
+'use strict';
 
 function print_trace() {
     print(wvtest_trace())
